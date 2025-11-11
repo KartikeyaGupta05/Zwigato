@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import theme from "../theme";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {toast } from 'react-toastify';
+import { signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../../config/firebase";
 
 const Register = () => {
   const [fullName, setFullName] = useState("");
@@ -11,7 +15,51 @@ const Register = () => {
   const [contact, setContact] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState("User");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    if(password !== confirmPassword){
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/auth/register`, {
+        fullName,
+        email,
+        password,
+        contact,
+        role: selectedRole,
+      }, { withCredentials: true });
+
+      if (response.status === 201) {
+        toast.success("Registration successful! Please login.");
+        setFullName("");
+        setEmail("");
+        setContact("");
+        setPassword("");
+        setConfirmPassword("");
+        setSelectedRole("User");
+        navigate("/login");
+      }
+    } catch (err) {
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    console.log(result);
+  };
 
   return (
     <>
@@ -36,7 +84,7 @@ const Register = () => {
             </p>
           </div>
 
-          <form className="mt-6">
+          <form onSubmit={submitHandler} className="mt-2">
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-1"
@@ -115,12 +163,37 @@ const Register = () => {
                 className="block text-sm font-medium mb-1"
                 style={{ color: theme.textColor }}
               >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="block w-full border border-gray-300 rounded-md p-2 outline-none focus:ring-1 focus:ring-orange-400"
+                  style={{ borderColor: theme.borderColor }}
+                  placeholder="Enter Your Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3.5 text-gray-400 cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                </button>
+              </div>
+            </div>
+            <div className="mb-4">
+              <label
+                className="block text-sm font-medium mb-1"
+                style={{ color: theme.textColor }}
+              >
                 Role
               </label>
               <div className="flex gap-3 items-center justify-evenly mt-3">
-                {["User", "Owner", "Delivery Boy"].map((role) => (
+                {["User", "Restaurent Owner", "Delivery Boy"].map((role) => (
                   <div key={role} className="flex items-center">
-                    <button type="button" className="flex-1 cursor-pointer border rounded-lg px-5 py-2 text-center font-medium transition-colors duration-300 hover:bg-orange-400 hover:text-white"
+                    <button type="button" className="flex-1 cursor-pointer border rounded-lg px-3 py-2 text-center font-medium transition-colors duration-300 hover:bg-orange-400 hover:text-white"
                     onClick={() => setSelectedRole(role)}
                       style={{
                         backgroundColor: selectedRole === role ? theme.primaryColor : "transparent",
@@ -135,21 +208,26 @@ const Register = () => {
             </div>
             <button
               type="submit"
+              disabled={loading}
               className="w-full py-2 rounded-md text-white font-bold text-base mt-4 hover:bg-orange-700 transition-colors duration-300 cursor-pointer"
               style={{ backgroundColor: theme.primaryColor}}
             >
-              Register
+              {loading ? (
+                <div className="w-6 h-6 animate-spin border-b-2 border-t-2 rounded-full "></div>
+              ) : (
+                "Register"
+              )}
             </button> 
 
-            <button className="w-full py-2 rounded-md text-base mt-4 border flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors duration-300 cursor-pointer" style={{ borderColor: theme.borderColor }}>
+          </form>
+            <button onClick={handleGoogleAuth} type="button" className="w-full py-2 rounded-md text-base mt-4 border flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors duration-300 cursor-pointer" style={{ borderColor: theme.borderColor }}>
               <FcGoogle size={20} />
               Sign Up with Google
             </button>
             <div className="text-center mt-4" style={{ color: theme.secondaryColor }}>
               Already have an account?
-                <Link to="/login" className=" text-blue-500" > Login</Link>
+                <Link to="/login" className=" text-blue-500" >Login</Link>
                 </div>
-          </form>
         </div>
       </div>
     </>
