@@ -4,10 +4,13 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import {toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { signInWithPopup } from "firebase/auth";
 import { GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../../config/firebase";
+import { ClipLoader } from "react-spinners";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/reducer/userSlice";
 
 const Register = () => {
   const [fullName, setFullName] = useState("");
@@ -20,24 +23,29 @@ const Register = () => {
   const [selectedRole, setSelectedRole] = useState("User");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if(password !== confirmPassword){
+    if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/auth/register`, {
-        fullName,
-        email,
-        password,
-        contact,
-        role: selectedRole,
-      }, { withCredentials: true });
-
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/auth/register`,
+        {
+          fullName,
+          email,
+          password,
+          contact,
+          role: selectedRole,
+        },
+        { withCredentials: true }
+      );
+      dispatch(setUserData(response.data));
       if (response.status === 201) {
         toast.success("Registration successful! Please login.");
         setFullName("");
@@ -48,17 +56,69 @@ const Register = () => {
         setSelectedRole("User");
         navigate("/login");
       }
-    } catch (err) {
-      toast.error("Registration failed. Please try again.");
+      setLoading(false);
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Internal server error");
+      }
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
+    if (!contact) {
+      toast.error(
+        "Please enter your contact number before signing up with Google."
+      );
+      return;
+    }
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    console.log(result);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/auth/google-auth-register`,
+        {
+          fullName: result.user.displayName,
+          email: result.user.email,
+          contact: contact,
+          role: selectedRole,
+        },
+        { withCredentials: true }
+      );
+      dispatch(setUserData(response.data));
+      if (response.status === 201) {
+        toast.success("Registration successful! Please login.");
+        setFullName("");
+        setEmail("");
+        setContact("");
+        setPassword("");
+        setConfirmPassword("");
+        setSelectedRole("User");
+        navigate("/login");
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Internal server error");
+      }
+    }
   };
 
   return (
@@ -93,6 +153,7 @@ const Register = () => {
                 Full Name
               </label>
               <input
+                required
                 type="text"
                 className="block w-full border border-gray-300 rounded-md p-2 outline-none focus:ring-1 focus:ring-orange-400"
                 style={{ borderColor: theme.borderColor }}
@@ -110,6 +171,7 @@ const Register = () => {
               </label>
               <input
                 type="email"
+                required
                 className="block w-full border border-gray-300 rounded-md p-2 outline-none focus:ring-1 focus:ring-orange-400"
                 style={{ borderColor: theme.borderColor }}
                 placeholder="Enter Your Email"
@@ -126,6 +188,7 @@ const Register = () => {
               </label>
               <input
                 type="text"
+                required
                 className="block w-full border border-gray-300 rounded-md p-2 outline-none focus:ring-1 focus:ring-orange-400"
                 style={{ borderColor: theme.borderColor }}
                 placeholder="Enter Your Contact Number"
@@ -142,6 +205,7 @@ const Register = () => {
               </label>
               <div className="relative">
                 <input
+                  required
                   type={showPassword ? "text" : "password"}
                   className="block w-full border border-gray-300 rounded-md p-2 outline-none focus:ring-1 focus:ring-orange-400"
                   style={{ borderColor: theme.borderColor }}
@@ -167,6 +231,7 @@ const Register = () => {
               </label>
               <div className="relative">
                 <input
+                  required
                   type={showConfirmPassword ? "text" : "password"}
                   className="block w-full border border-gray-300 rounded-md p-2 outline-none focus:ring-1 focus:ring-orange-400"
                   style={{ borderColor: theme.borderColor }}
@@ -193,14 +258,19 @@ const Register = () => {
               <div className="flex gap-3 items-center justify-evenly mt-3">
                 {["User", "Restaurent Owner", "Delivery Boy"].map((role) => (
                   <div key={role} className="flex items-center">
-                    <button type="button" className="flex-1 cursor-pointer border rounded-lg px-3 py-2 text-center font-medium transition-colors duration-300 hover:bg-orange-400 hover:text-white"
-                    onClick={() => setSelectedRole(role)}
+                    <button
+                      type="button"
+                      className="flex-1 cursor-pointer border rounded-lg px-3 py-2 text-center font-medium transition-colors duration-300 hover:bg-orange-400 hover:text-white"
+                      onClick={() => setSelectedRole(role)}
                       style={{
-                        backgroundColor: selectedRole === role ? theme.primaryColor : "transparent",
+                        backgroundColor:
+                          selectedRole === role
+                            ? theme.primaryColor
+                            : "transparent",
                         color: selectedRole === role ? "white" : "black",
-                      }}>
+                      }}
+                    >
                       {role}
-                      
                     </button>
                   </div>
                 ))}
@@ -210,24 +280,33 @@ const Register = () => {
               type="submit"
               disabled={loading}
               className="w-full py-2 rounded-md text-white font-bold text-base mt-4 hover:bg-orange-700 transition-colors duration-300 cursor-pointer"
-              style={{ backgroundColor: theme.primaryColor}}
+              style={{ backgroundColor: theme.primaryColor }}
             >
               {loading ? (
-                <div className="w-6 h-6 animate-spin border-b-2 border-t-2 rounded-full "></div>
+                <ClipLoader size={20} color="white" />
               ) : (
                 "Register"
               )}
-            </button> 
-
-          </form>
-            <button onClick={handleGoogleAuth} type="button" className="w-full py-2 rounded-md text-base mt-4 border flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors duration-300 cursor-pointer" style={{ borderColor: theme.borderColor }}>
-              <FcGoogle size={20} />
-              Sign Up with Google
             </button>
-            <div className="text-center mt-4" style={{ color: theme.secondaryColor }}>
-              Already have an account?
-                <Link to="/login" className=" text-blue-500" >Login</Link>
-                </div>
+          </form>
+          <button
+            onClick={handleGoogleAuth}
+            type="button"
+            className="w-full py-2 rounded-md text-base mt-4 border flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors duration-300 cursor-pointer"
+            style={{ borderColor: theme.borderColor }}
+          >
+            <FcGoogle size={20} />
+            Sign Up with Google
+          </button>
+          <div
+            className="text-center mt-4"
+            style={{ color: theme.secondaryColor }}
+          >
+            Already have an account?
+            <Link to="/login" className=" text-blue-500">
+              Login
+            </Link>
+          </div>
         </div>
       </div>
     </>

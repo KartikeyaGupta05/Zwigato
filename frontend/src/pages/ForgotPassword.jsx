@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { GoArrowLeft } from "react-icons/go";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { ClipLoader } from "react-spinners";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -28,8 +29,10 @@ const ForgotPassword = () => {
         toast.success("OTP sent to your email");
         setStep(2);
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error sending OTP:", error);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -45,8 +48,10 @@ const ForgotPassword = () => {
         { withCredentials: true }
       );
       setStep(3);
+      setLoading(false);
     } catch (error) {
       console.error("Error verifying OTP:", error);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -66,9 +71,12 @@ const ForgotPassword = () => {
         { email, newPassword },
         { withCredentials: true }
       );
+      toast.success("Password reset successful! Please login.");
+      setLoading(false);
       navigate("/login");
     } catch (error) {
       console.error("Error resetting password:", error);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -116,10 +124,10 @@ const ForgotPassword = () => {
               {loading ? (
                 <div className="flex items-center gap-1">
                   <h1>please wait...</h1>
-                  <div className="w-6 h-6 animate-spin border-b-3  rounded-full "></div>
+                  <ClipLoader size={20} color="white" />
                 </div>
               ) : (
-                "sent OTP"
+                "Sent OTP"
               )}
             </button>
           </form>
@@ -147,10 +155,10 @@ const ForgotPassword = () => {
               {loading ? (
                 <div className="flex items-center gap-1">
                   <h1>please wait...</h1>
-                  <div className="w-6 h-6 animate-spin border-b-3  rounded-full "></div>
+                  <ClipLoader size={20} color="white" />
                 </div>
               ) : (
-                "verify OTP"
+                "Verify OTP"
               )}
             </button>
           </form>
@@ -190,10 +198,10 @@ const ForgotPassword = () => {
               {loading ? (
                 <div className="flex items-center gap-1">
                   <h1>please wait...</h1>
-                  <div className="w-6 h-6 animate-spin border-b-3  rounded-full "></div>
+                  <ClipLoader size={20} color="white" />
                 </div>
               ) : (
-                "reset password"
+                "Reset Password"
               )}
             </button>
           </form>

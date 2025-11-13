@@ -1,9 +1,9 @@
 import express from "express";
-const router = express.Router();
+const authRouter = express.Router();
 import { body } from "express-validator";
-import { registerUser, loginUser, logoutUser, sendOtp, verifyOtp, resetPassword } from "../controllers/auth.controllers.js";
+import { registerUser, loginUser, logoutUser, sendOtp, verifyOtp, resetPassword, googleAuthRegister, googleAuthLogin } from "../controllers/auth.controllers.js";
 
-router.post(
+authRouter.post(
     "/register",
     [
         body("fullName").notEmpty().withMessage("Full name is required"),
@@ -19,7 +19,7 @@ router.post(
     registerUser
 );
 
-router.post(
+authRouter.post(
     "/login",
     [
         body("email").isEmail().withMessage("Please provide a valid email"),
@@ -30,9 +30,9 @@ router.post(
     loginUser
 );
 
-router.get("/logout", logoutUser);
+authRouter.get("/logout", logoutUser);
 
-router.post(
+authRouter.post(
     "/send-otp",
     [
         body("email").isEmail().withMessage("Please provide a valid email"),
@@ -40,7 +40,7 @@ router.post(
     sendOtp
 );
 
-router.post(
+authRouter.post(
     "/verify-otp",
     [
         body("email").isEmail().withMessage("Please provide a valid email"),
@@ -49,7 +49,7 @@ router.post(
     verifyOtp
 );
 
-router.post(
+authRouter.post(
     "/reset-password",
     [
         body("email").isEmail().withMessage("Please provide a valid email"),
@@ -60,4 +60,25 @@ router.post(
     resetPassword
 );
 
-export default router;
+authRouter.post(
+    "/google-auth-register",
+    [
+        body("fullName").notEmpty().withMessage("Full name is required"),
+        body("email").isEmail().withMessage("Please provide a valid email"),
+        body("contact").notEmpty().withMessage("Contact number is required"),
+        body("role")
+            .isIn(["User", "Restaurent Owner", "Delivery Boy"])
+            .withMessage("Role must be either User, Restaurent Owner, or Delivery Boy"),
+    ],
+    googleAuthRegister
+);
+
+authRouter.post(
+    "/google-auth-login",
+    [
+        body("email").isEmail().withMessage("Please provide a valid email"),
+    ],
+    googleAuthLogin
+);      
+
+export default authRouter;

@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express";
 import connectToDb from "./db/db.js";
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -24,5 +25,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 export default app;
