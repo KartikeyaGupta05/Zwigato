@@ -13,8 +13,8 @@ authRouter.post(
             .withMessage("Password must be at least 6 characters long"),
         body("contact").notEmpty().withMessage("Contact number is required"),
         body("role")
-            .isIn(["User", "Restaurent Owner", "Delivery Boy"])
-            .withMessage("Role must be either User, Restaurent Owner, or Delivery Boy"),
+            .isIn(["user", "owner", "deliveryboy"])
+            .withMessage("Role must be either User, Owner, or Delivery Boy"),
     ],
     registerUser
 );
@@ -67,8 +67,8 @@ authRouter.post(
         body("email").isEmail().withMessage("Please provide a valid email"),
         body("contact").notEmpty().withMessage("Contact number is required"),
         body("role")
-            .isIn(["User", "Restaurent Owner", "Delivery Boy"])
-            .withMessage("Role must be either User, Restaurent Owner, or Delivery Boy"),
+            .isIn(["user", "owner", "deliveryboy"])
+            .withMessage("Role must be either User, Owner, or Delivery Boy"),
     ],
     googleAuthRegister
 );

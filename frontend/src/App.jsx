@@ -4,10 +4,14 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Home from "./pages/Home.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
+import CreatedShop from "./pages/CreatedShop.jsx";
+import AddItem from "./pages/AddItem.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useGetCurrentUser from "./hooks/useGetCurrentUser.jsx";
 import { useSelector } from "react-redux";
+import useGetUserCity from "./hooks/useGetUserCity.jsx";
+import useGetMyShop from "./hooks/useGetMyShop.jsx";
 
 const PublicRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
@@ -21,6 +25,8 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   useGetCurrentUser();
+  useGetUserCity();
+  useGetMyShop();
   return (
     <>
       <Routes>
@@ -54,6 +60,22 @@ function App() {
             <PublicRoute>
               <ForgotPassword />
             </PublicRoute>
+          }
+        />
+        <Route
+          path="/create-shop"
+          element={
+            <ProtectedRoute>
+              <CreatedShop />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-item"
+          element={
+            <ProtectedRoute>
+              <AddItem />
+            </ProtectedRoute>
           }
         />
       </Routes>

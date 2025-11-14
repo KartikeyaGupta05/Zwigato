@@ -20,7 +20,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("User");
+  const [selectedRole, setSelectedRole] = useState("user");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -47,7 +47,7 @@ const Register = () => {
       );
       dispatch(setUserData(response.data));
       if (response.status === 201) {
-        toast.success("Registration successful! Please login.");
+        toast.success("Registration successful! Welcome to Zwigato.");
         setFullName("");
         setEmail("");
         setContact("");
@@ -97,7 +97,7 @@ const Register = () => {
       );
       dispatch(setUserData(response.data));
       if (response.status === 201) {
-        toast.success("Registration successful! Please login.");
+        toast.success("Registration successful! Welcome to Zwigato.");
         setFullName("");
         setEmail("");
         setContact("");
@@ -256,7 +256,7 @@ const Register = () => {
                 Role
               </label>
               <div className="flex gap-3 items-center justify-evenly mt-3">
-                {["User", "Restaurent Owner", "Delivery Boy"].map((role) => (
+                {["user", "owner", "deliveryboy"].map((role) => (
                   <div key={role} className="flex items-center">
                     <button
                       type="button"

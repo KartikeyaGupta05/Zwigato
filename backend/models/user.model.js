@@ -10,9 +10,9 @@ const userSchema = new mongoose.Schema(
     contact: { type: String, required: true, unique: true },
     role: {
       type: String,
-      enum: ["User", "Restaurent Owner", "Delivery Boy"],
+      enum: ["user", "owner", "deliveryboy"],
       required: true,
-      default: "User",
+      default: "user",
     },
     resetOtp: { type: String },
     isOtpVerified: { type: Boolean, default: false },

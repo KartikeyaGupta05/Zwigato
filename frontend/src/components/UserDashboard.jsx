@@ -1,11 +1,15 @@
-import React from 'react'
+import React from 'react';
+import UserNavbar from './UserNavbar';
 
 const UserDashboard = () => {
   return (
-    <div>
-      
-    </div>
-  )
-}
+    <>
+      <UserNavbar />
+      <div>
+        <h1>Hi</h1>
+      </div>
+    </>
+  );
+};
 
-export default UserDashboard
+export default UserDashboard;
