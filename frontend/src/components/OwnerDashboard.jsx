@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { FaUtensils } from "react-icons/fa6";
 import { FaPen } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import OwnerItemCard from "./OwnerItemCard";
 
 const OwnerDashboard = () => {
   const { myShopData } = useSelector((state) => state.owner);
@@ -57,38 +58,20 @@ const OwnerDashboard = () => {
             </p>
           </div>
 
-          <div
-            className="
-  bg-white shadow-xl rounded-2xl overflow-visible 
-  border border-orange-100 w-full max-w-3xl relative 
-  transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
-"
-          >
-            <div
-              className="
-      absolute top-4 right-4 
-      bg-[#ff4d2d] text-white p-2.5 
-      rounded-full shadow-xl cursor-pointer
-      hover:bg-orange-600 active:scale-95 
-      transition-all duration-300
-      z-20
-    "
-            >
-              <FaPen size={20} />
+          <div className="bg-white shadow-xl rounded-2xl overflow-visible border border-orange-100 w-full max-w-3xl relative transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+            <div className="absolute top-4 right-4  bg-[#ff4d2d] text-white p-2.5 rounded-full shadow-xl cursor-pointer hover:bg-orange-600 active:scale-95 transition-all duration-300 z-20">
+              <Link to={`/edit-shop/${myShopData?.shop?._id}`}>
+                <FaPen size={20} />
+              </Link>
             </div>
 
             <div className="overflow-hidden rounded-t-2xl relative z-10">
               <img
                 src={myShopData?.shop?.image}
                 alt={myShopData?.shop?.shopName}
-                className="
-        w-full h-56 sm:h-72 object-cover 
-        transition-transform duration-500 
-        hover:scale-105
-      "
+                className=" w-full h-56 sm:h-72 object-cover transition-transform duration-500 hover:scale-105"
               />
             </div>
-
             <div className="p-6 sm:p-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
                 {myShopData?.shop?.shopName}
@@ -144,6 +127,14 @@ const OwnerDashboard = () => {
                   </Link>
                 </div>
               </div>
+            </div>
+          )}
+
+          {myShopData?.shop?.items?.length > 0 && (
+            <div className="w-full max-w-4xl flex flex-col gap-3 items-center">
+              {myShopData?.shop?.items.map((item, index) => (
+                <OwnerItemCard key={index} data={item} />
+              ))}
             </div>
           )}
         </div>

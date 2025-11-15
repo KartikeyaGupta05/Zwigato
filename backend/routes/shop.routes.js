@@ -3,6 +3,7 @@ import {
   shopCreateController,
   shopUpdatedController,
   getMyShopController,
+  getShopsByCity,
 } from "../controllers/shop.controllers.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -25,12 +26,14 @@ shopRouter.post(
   shopCreateController
 );
 shopRouter.put(
-  "/shop-update/:shopId",
+  "/edit-shop/:shopId",
   authMiddleware,
   upload.single("image"),
   shopValidation,
   shopUpdatedController
 );
 
-shopRouter.get("/get-myShop", authMiddleware, getMyShopController);
+shopRouter.get("/get-myShop", getMyShopController);
+shopRouter.get("/get-shops-by-city/:city", getShopsByCity);
+
 export default shopRouter;

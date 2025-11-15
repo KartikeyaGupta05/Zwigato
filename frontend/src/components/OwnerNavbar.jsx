@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { TfiReceipt } from "react-icons/tfi";
 import theme from "../theme";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -14,6 +14,7 @@ const OwnerNavbar = () => {
   const [showInfoBox, setShowInfoBox] = useState(false);
   const dispatch = useDispatch();
   const { myShopData } = useSelector((state) => state.owner);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -42,6 +43,7 @@ const OwnerNavbar = () => {
           <>
             <button
               type="button"
+              onClick={() => navigate("/add-item")}
               className="px-3 py-1 hidden md:flex items-center gap-2 rounded-lg text-sm font-medium cursor-pointer "
               style={{
                 color: theme.secondaryColor,
@@ -55,6 +57,7 @@ const OwnerNavbar = () => {
 
             <button
               type="button"
+              onClick={() => navigate("/add-item")}
               className="px-3 py-1 md:hidden flex items-center gap-2 rounded-full text-sm font-medium cursor-pointer "
               style={{
                 color: theme.secondaryColor,

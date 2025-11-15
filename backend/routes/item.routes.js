@@ -2,6 +2,9 @@ import express from "express";
 import {
   itemCreateController,
   itemUpdatedController,
+  getItemById,
+  deleteItem,
+  getItemsByCity,
 } from "../controllers/item.controllers.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -29,5 +32,9 @@ itemRouter.put(
   itemValidation,
   itemUpdatedController
 );
+
+itemRouter.get("/getItem-by-id/:itemId", authMiddleware, getItemById);
+itemRouter.delete("/delete-item/:itemId", authMiddleware, deleteItem);
+itemRouter.get("/getItems-by-city/:city",authMiddleware, getItemsByCity);
 
 export default itemRouter;
