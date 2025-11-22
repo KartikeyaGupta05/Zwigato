@@ -50,7 +50,6 @@ const CreatedShop = () => {
         }
       );
       dispatch(setMyShopData(response.data));
-      console.log(response.data);
       setLoading(false);
       toast.success("Shop created successfully");
       navigate("/");

@@ -8,6 +8,10 @@ import CreatedShop from "./pages/CreatedShop.jsx";
 import EditShop from "./pages/EditShop.jsx";
 import AddItem from "./pages/AddItem.jsx";
 import EditItem from "./pages/EditItem.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import CheckOut from "./pages/CheckOut.jsx";
+import OrderPlaced from "./pages/OrderPlaced.jsx";
+import MyOrders from "./pages/MyOrders.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useGetCurrentUser from "./hooks/useGetCurrentUser.jsx";
@@ -16,6 +20,7 @@ import useGetUserCity from "./hooks/useGetUserCity.jsx";
 import useGetMyShop from "./hooks/useGetMyShop.jsx";
 import useGetShopsByCity from "./hooks/useGetShopsByCity.jsx";
 import useGetItemsByCity from "./hooks/useGetItemsByCity.jsx";
+import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 
 const PublicRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
@@ -33,6 +38,7 @@ function App() {
   useGetMyShop();
   useGetShopsByCity();
   useGetItemsByCity();
+  useGetMyOrders();
   return (
     <>
       <Routes>
@@ -97,6 +103,39 @@ function App() {
           element={
             <ProtectedRoute>
               <EditItem />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckOut />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/order-placed"
+          element={
+            <ProtectedRoute>
+              <OrderPlaced />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-orders"
+          element={
+            <ProtectedRoute>
+              <MyOrders />
             </ProtectedRoute>
           }
         />

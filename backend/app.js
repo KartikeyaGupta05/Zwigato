@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import shopRoutes from "./routes/shop.routes.js";
 import itemRoutes from "./routes/item.routes.js";
+import orderRouter from "./routes/order.routes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -30,5 +31,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/shop", shopRoutes);
 app.use("/api/item", itemRoutes);
+app.use("/api/order", orderRouter);
 
 export default app;

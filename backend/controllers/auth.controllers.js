@@ -1,6 +1,6 @@
 import User from "../models/user.model.js";
 import { validationResult } from "express-validator";
-import { sendOtpMail } from "../utils/sendMail.js";
+import { sendOtpMail } from "../utils/mail.js";
 
 export const registerUser = async (req, res) => {
   const errors = validationResult(req);

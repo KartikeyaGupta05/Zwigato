@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { IoMdPeople } from "react-icons/io";
 import { FaShoppingCart } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/reducer/userSlice";
 
 const ItemCard = ({ data }) => {
-  const [count, setCount] = useState(0);
+  const [quantity, setQuantity] = useState(0);
+  const dispatch = useDispatch();
+  const {cartItems} = useSelector((state) => state.user);
 
   const type = data.foodType;
 
@@ -79,10 +83,10 @@ const ItemCard = ({ data }) => {
             ₹{data.price}
           </p>
 
-          {count === 0 ? (
+          {quantity === 0 ? (
             <button
               className="px-4 py-1 bg-orange-500 cursor-pointer text-white rounded-lg font-semibold text-sm hover:bg-orange-600 transition"
-              onClick={() => setCount(1)}
+              onClick={() => setQuantity(1)}
             >
               Add
             </button>
@@ -90,22 +94,40 @@ const ItemCard = ({ data }) => {
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-2.5 bg-white border border-orange-400 px-3 rounded-full shadow-sm">
                 <button
-                  onClick={() => setCount(count - 1)}
+                  onClick={() => setQuantity(quantity - 1)}
                   className="text-orange-600 font-bold text-2xl cursor-pointer"
                 >
                   -
                 </button>
-                <span className="text-gray-900 font-semibold">{count}</span>
+                <span className="text-gray-900 font-semibold">{quantity}</span>
                 <button
-                  onClick={() => setCount(count + 1)}
+                  onClick={() => setQuantity(quantity + 1)}
                   className="text-orange-600 font-bold text-2xl cursor-pointer"
                 >
                   +
                 </button>
               </div>
-              <span className="text-white hover:bg-white hover:text-orange-600 bg-orange-600 rounded-full drop-shadow-xl cursor-pointer p-2">
+              <button
+                type="button"
+                className={`${cartItems.some(i => i.id === data._id) ? "bg-gray-700 hover:bg-white hover:text-gray-700" : "bg-orange-600 hover:bg-white hover:text-orange-600"} text-white rounded-full drop-shadow-xl cursor-pointer p-2`}
+                onClick={() => {
+                  quantity > 0
+                    ? dispatch(
+                        addToCart({
+                          id: data._id,
+                          name: data.foodName,
+                          price: data.price,
+                          image: data.image,
+                          shop: data.shop,
+                          quantity,
+                          foodType: data.foodType,
+                        })
+                      )
+                    : null;
+                }}
+              >
                 <FaShoppingCart />
-              </span>
+              </button>
             </div>
           )}
         </div>

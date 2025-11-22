@@ -12,7 +12,7 @@ import { setUserData } from "../redux/reducer/userSlice";
 import { toast } from "react-toastify";
 
 const UserNavbar = () => {
-  const { userData, userCity } = useSelector((state) => state.user);
+  const { userData, userCity, cartItems } = useSelector((state) => state.user);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const dispatch = useDispatch();
@@ -95,7 +95,7 @@ const UserNavbar = () => {
         )}
 
         <>
-          <div className="relative cursor-pointer">
+          <Link to="/cart" className="relative cursor-pointer">
             <FaShoppingCart size={25} className="text-[#ff4d2d]" />
             <span
               className="absolute -top-3.5 -right-4.5 font-semibold text-sm text-white rounded-full px-1.5 py-px"
@@ -103,9 +103,9 @@ const UserNavbar = () => {
                 backgroundColor: theme.primaryColor,
               }}
             >
-              0
+              {cartItems.length}
             </span>
-          </div>
+          </Link>
 
           <button
             type="button"

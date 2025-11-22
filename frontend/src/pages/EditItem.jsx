@@ -61,7 +61,6 @@ const EditItem = () => {
         }
       );
       dispatch(setMyShopData(response.data));
-      console.log(response.data);
       setLoading(false);
       toast.success("Item added successfully");
       navigate("/");
