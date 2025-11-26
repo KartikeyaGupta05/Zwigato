@@ -4,7 +4,7 @@ import { FcSearch } from "react-icons/fc";
 import { FaShoppingCart } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
 import theme from "../theme";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -16,6 +16,7 @@ const UserNavbar = () => {
   const [showInfoBox, setShowInfoBox] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -115,6 +116,7 @@ const UserNavbar = () => {
               border: `2px solid ${theme.primaryColor}`,
               backgroundColor: theme.primaryColor + "20",
             }}
+            onClick={() => navigate("/my-orders")}
           >
             My Orders
           </button>
@@ -134,6 +136,7 @@ const UserNavbar = () => {
           <div
             className="md:hidden cursor-pointer font-semibold"
             style={{ color: theme.primaryColor }}
+            onClick={() => navigate("/my-orders")}
           >
             My Orders
           </div>

@@ -33,7 +33,7 @@ shopRouter.put(
   shopUpdatedController
 );
 
-shopRouter.get("/get-myShop", getMyShopController);
+shopRouter.get("/get-myShop", authMiddleware, getMyShopController);
 shopRouter.get("/get-shops-by-city/:city", getShopsByCity);
 
 export default shopRouter;

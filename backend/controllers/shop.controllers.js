@@ -109,8 +109,8 @@ export const getMyShopController = async (req, res) => {
   try {
     const owner = req.id;
     const shop = await Shop.findOne({ owner: owner })
-      .populate("owner")
-      .populate({
+    await shop.populate("owner")
+    await shop.populate({
         path: "items",
         options: { sort: { updatedAt: -1 } },
       });

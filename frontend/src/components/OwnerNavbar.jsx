@@ -71,6 +71,7 @@ const OwnerNavbar = () => {
         )}
         <div
           className=" relative md:flex hidden items-center gap-3 px-3 py-1 rounded-lg text-sm font-medium cursor-pointer "
+          onClick={() => navigate("/my-orders")}
           style={{
             color: theme.secondaryColor,
             border: `2px solid ${theme.primaryColor}`,
@@ -91,6 +92,7 @@ const OwnerNavbar = () => {
 
         <div
           className="relative flex md:hidden items-center gap-3 px-3 py-1 rounded-lg text-sm font-medium cursor-pointer "
+          onClick={() => navigate("/my-orders")}
           style={{
             color: theme.secondaryColor,
             border: `2px solid ${theme.primaryColor}`,
@@ -104,7 +106,7 @@ const OwnerNavbar = () => {
               backgroundColor: theme.primaryColor,
             }}
           >
-            0
+            
           </span>
         </div>
 

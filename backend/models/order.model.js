@@ -26,11 +26,11 @@ const shopOrderSchema = new mongoose.Schema(
     },
     subtotal: Number,
     shopOrderItems: [shopOrderItemSchema],
-    // status: {
-    //   type: String,
-    //   enum: ["pending", "preparing", "out of delivery", "delivered"],
-    //   default: "pending",
-    // },
+    status: {
+      type: String,
+      enum: ["pending", "preparing", "out of delivery", "delivered"],
+      default: "pending",
+    },
     // assignment: {
     //   type: mongoose.Schema.Types.ObjectId,
     //   ref: "DeliveryAssignment",
@@ -61,7 +61,7 @@ const orderSchema = new mongoose.Schema(
     orderId: {
       type: String,
       unique: true,
-      sparse: true, // This allows multiple null values
+      sparse: true,
       default: null,
     },
     user: {

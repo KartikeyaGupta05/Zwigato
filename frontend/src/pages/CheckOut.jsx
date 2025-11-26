@@ -11,6 +11,7 @@ import "leaflet/dist/leaflet.css";
 import { setAddress, setLocation } from "../redux/reducer/mapSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { addMyOrder } from "../redux/reducer/userSlice";
 import axios from "axios";
 
 function RecenterMap({ location }) {
@@ -89,9 +90,8 @@ function CheckOut() {
         },
         { withCredentials: true }
       );
-      console.log(response.data)
       if (paymentMethod == "cod") {
-        // dispatch(addMyOrder(response.data));
+        dispatch(addMyOrder(response.data));
         navigate("/order-placed");
       } 
       // else {
