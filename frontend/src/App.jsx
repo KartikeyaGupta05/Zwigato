@@ -12,15 +12,17 @@ import CartPage from "./pages/CartPage.jsx";
 import CheckOut from "./pages/CheckOut.jsx";
 import OrderPlaced from "./pages/OrderPlaced.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
+import TrackOrderPage from "./pages/TrackOrderPage.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import useGetCurrentUser from "./hooks/useGetCurrentUser.jsx";
 import { useSelector } from "react-redux";
+import useGetCurrentUser from "./hooks/useGetCurrentUser.jsx";
 import useGetUserCity from "./hooks/useGetUserCity.jsx";
 import useGetMyShop from "./hooks/useGetMyShop.jsx";
 import useGetShopsByCity from "./hooks/useGetShopsByCity.jsx";
 import useGetItemsByCity from "./hooks/useGetItemsByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
+import useUpdateLocation from "./hooks/useUpdateLocation.jsx";
 
 const PublicRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
@@ -39,6 +41,7 @@ function App() {
   useGetShopsByCity();
   useGetItemsByCity();
   useGetMyOrders();
+  useUpdateLocation();
   return (
     <>
       <Routes>
@@ -136,6 +139,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MyOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/track-order/:orderId"
+          element={
+            <ProtectedRoute>
+              <TrackOrderPage />
             </ProtectedRoute>
           }
         />

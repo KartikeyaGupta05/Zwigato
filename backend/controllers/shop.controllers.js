@@ -108,18 +108,18 @@ export const shopUpdatedController = async (req, res) => {
 export const getMyShopController = async (req, res) => {
   try {
     const owner = req.id;
-    const shop = await Shop.findOne({ owner: owner })
-    await shop.populate("owner")
-    await shop.populate({
-        path: "items",
-        options: { sort: { updatedAt: -1 } },
-      });
+    const shop = await Shop.findOne({ owner: owner });
 
     if (!shop) {
       return res.status(404).json({
         message: "Shop not found",
       });
     }
+    await shop.populate("owner");
+    await shop.populate({
+      path: "items",
+      options: { sort: { updatedAt: -1 } },
+    });
     res.status(200).json({
       message: "Shop fetched successfully",
       shop,

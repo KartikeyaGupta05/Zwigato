@@ -10,16 +10,30 @@ const userSchema = new mongoose.Schema(
     contact: { type: String, required: true, unique: true },
     role: {
       type: String,
-      enum: ["user", "owner", "deliveryboy"],
+      enum: ["user", "owner", "deliveryBoy"],
       required: true,
       default: "user",
     },
     resetOtp: { type: String },
     isOtpVerified: { type: Boolean, default: false },
     resetOtpExpiry: { type: Date },
+    location: {
+      type: { type: String, enum: ["Point"], default: "Point" },
+      coordinates: { type: [Number], default: [0, 0] },
+    },
+    // socketId:{
+    //  type:String,
+
+    // },
+    // isOnline:{
+    //     type:Boolean,
+    //     default:false
+    // },
   },
   { timestamps: true }
 );
+
+userSchema.index({ location: "2dsphere" });
 
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {

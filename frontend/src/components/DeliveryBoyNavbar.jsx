@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/reducer/userSlice";
 import { toast } from "react-toastify";
 
-const OwnerNavbar = () => {
+const DeliveryBoyNavbar = () => {
   const { userData } = useSelector((state) => state.user);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const dispatch = useDispatch();
@@ -80,7 +80,7 @@ const OwnerNavbar = () => {
         >
           <TfiReceipt size={20} />
           <span>Orders Received</span>
-          
+         
         </div>
 
         <div
@@ -93,14 +93,7 @@ const OwnerNavbar = () => {
           }}
         >
           <TfiReceipt size={20} />
-          {/* <span
-            className="absolute -top-2.5 -right-2.5 font-semibold text-sm text-white rounded-full px-1.5 py-px"
-            style={{
-              backgroundColor: theme.primaryColor,
-            }}
-          >
-            
-          </span> */}
+          
         </div>
 
         <div
@@ -111,7 +104,7 @@ const OwnerNavbar = () => {
         </div>
       </div>
       {showInfoBox && (
-        <div className="fixed top-20 right-2.5 md:right-[10%] lg:right-[15%] w-[180px] bg-white shadow-2xl rounded-xl p-5 flex flex-col gap-2.5 z-9999">
+        <div className="fixed top-20 right-2.5 md:right-[10%] lg:right-[35%] w-[180px] bg-white shadow-2xl rounded-xl p-5 flex flex-col gap-2.5 z-9999">
           <div className="text-[16px] font-semibold">
             {userData?.user?.fullName}
           </div>
@@ -128,4 +121,4 @@ const OwnerNavbar = () => {
   );
 };
 
-export default OwnerNavbar;
+export default DeliveryBoyNavbar;

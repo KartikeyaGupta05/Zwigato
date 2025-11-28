@@ -13,7 +13,6 @@ const Home = () => {
         className="w-screen min-h-screen px-5 flex flex-col gap-5 items-center"
         style={{ backgroundColor: theme.backgroundColor }}
       >
-        
         {userData?.user?.role?.toLowerCase() === "user" && <UserDashboard />}
         {userData?.user?.role?.toLowerCase() === "owner" && <OwnerDashboard />}
         {userData?.user?.role?.toLowerCase() === "deliveryboy" && <DeliveryBoyDashboard />}

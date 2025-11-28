@@ -256,7 +256,7 @@ const Register = () => {
                 Role
               </label>
               <div className="flex gap-3 items-center justify-evenly mt-3">
-                {["user", "owner", "deliveryboy"].map((role) => (
+                {["user", "owner", "deliveryBoy"].map((role) => (
                   <div key={role} className="flex items-center">
                     <button
                       type="button"

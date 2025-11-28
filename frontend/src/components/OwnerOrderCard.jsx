@@ -17,7 +17,7 @@ function OwnerOrderCard({ data }) {
         { withCredentials: true }
       );
       dispatch(updateOrderStatus({ orderId, shopId, status }));
-      setAvailableBoys(result.data.availableBoys);
+      setAvailableBoys(result.data?.availableBoys);
       console.log(result.data);
     } catch (error) {
       console.log(error);
@@ -110,13 +110,13 @@ function OwnerOrderCard({ data }) {
           {availableBoys?.length > 0 ? (
             availableBoys.map((b, index) => (
               <div className="text-gray-800">
-                {b.fullName}-{b.mobile}
+                {b.fullName}-{b.contact}
               </div>
             ))
           ) : data.shopOrders.assignedDeliveryBoy ? (
             <div>
               {data.shopOrders.assignedDeliveryBoy.fullName}-
-              {data.shopOrders.assignedDeliveryBoy.mobile}
+              {data.shopOrders.assignedDeliveryBoy.contact}
             </div>
           ) : (
             <div>Waiting for delivery boy to accept</div>
