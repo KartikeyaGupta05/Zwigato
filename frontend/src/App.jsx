@@ -13,9 +13,10 @@ import CheckOut from "./pages/CheckOut.jsx";
 import OrderPlaced from "./pages/OrderPlaced.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
 import TrackOrderPage from "./pages/TrackOrderPage.jsx";
+import Shop from "./pages/Shop.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import useGetCurrentUser from "./hooks/useGetCurrentUser.jsx";
 import useGetUserCity from "./hooks/useGetUserCity.jsx";
 import useGetMyShop from "./hooks/useGetMyShop.jsx";
@@ -23,6 +24,7 @@ import useGetShopsByCity from "./hooks/useGetShopsByCity.jsx";
 import useGetItemsByCity from "./hooks/useGetItemsByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useUpdateLocation from "./hooks/useUpdateLocation.jsx";
+import { setSocket } from "./redux/reducer/userSlice.js";
 
 const PublicRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
@@ -35,6 +37,8 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const { userData } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   useGetCurrentUser();
   useGetUserCity();
   useGetMyShop();
@@ -42,6 +46,22 @@ function App() {
   useGetItemsByCity();
   useGetMyOrders();
   useUpdateLocation();
+
+  useEffect(() => {
+    const socketInstance = io(`${import.meta.env.VITE_BASE_URL}`, {
+      withCredentials: true,
+    });
+    dispatch(setSocket(socketInstance));
+    socketInstance.on("connect", () => {
+      if (userData) {
+        socketInstance.emit("identity", { userId: userData._id });
+      }
+    });
+    return () => {
+      socketInstance.disconnect(); 
+    };
+  }, [userData?._id]);
+
   return (
     <>
       <Routes>
@@ -125,7 +145,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/order-placed"
           element={
@@ -147,6 +167,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TrackOrderPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shop/:shopId"
+          element={
+            <ProtectedRoute>
+              <Shop />
             </ProtectedRoute>
           }
         />

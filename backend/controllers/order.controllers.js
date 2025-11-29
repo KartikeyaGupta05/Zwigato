@@ -2,6 +2,13 @@ import Order from "../models/order.model.js";
 import Shop from "../models/shop.model.js";
 import User from "../models/user.model.js";
 import DeliveryAssignment from "../models/deliveryAssignment.model.js";
+import { sendDeliveryOtpMail } from "../utils/mail.js";
+import Razorpay from "razorpay";
+
+const instance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 export const placeOrder = async (req, res) => {
   try {
@@ -59,29 +66,28 @@ export const placeOrder = async (req, res) => {
       .toString(36)
       .substr(2, 9)}`;
 
-    // if (paymentMethod == "online") {
-    //     const razorOrder = await instance.orders.create({
-    //         amount: Math.round(totalAmount * 100),
-    //         currency: 'INR',
-    //         receipt: `receipt_${Date.now()}`
-    //     })
-    //     const newOrder = await Order.create({
-    //         orderId,
-    //         user: req.id,
-    //         paymentMethod,
-    //         deliveryAddress,
-    //         totalAmount,
-    //         shopOrders,
-    //         razorpayOrderId: razorOrder.id,
-    //         payment: false
-    //     })
+    if (paymentMethod == "online") {
+      const razorOrder = await instance.orders.create({
+        amount: Math.round(totalAmount * 100),
+        currency: "INR",
+        receipt: `receipt_${Date.now()}`,
+      });
+      const newOrder = await Order.create({
+        orderId,
+        user: req.id,
+        paymentMethod,
+        deliveryAddress,
+        totalAmount,
+        shopOrders,
+        razorpayOrderId: razorOrder.id,
+        payment: false,
+      });
 
-    //     return res.status(200).json({
-    //         razorOrder,
-    //         orderId: newOrder._id,
-    //     })
-
-    // }
+      return res.status(200).json({
+        razorOrder,
+        orderId: newOrder._id,
+      });
+    }
 
     const newOrder = await Order.create({
       orderId,
@@ -97,35 +103,81 @@ export const placeOrder = async (req, res) => {
       "foodName image price"
     );
     await newOrder.populate("shopOrders.shop", "shopName");
-    await newOrder.populate("shopOrders.owner", "fullName");
-    // await newOrder.populate("shopOrders.owner", "fullName socketId")
     await newOrder.populate("user", "fullName email contact");
+    await newOrder.populate("shopOrders.owner", "fullName socketId");
 
-    // const io = req.app.get('io')
+    const io = req.app.get("io");
 
-    // if (io) {
-    //     newOrder.shopOrders.forEach(shopOrder => {
-    //         const ownerSocketId = shopOrder.owner.socketId
-    //         if (ownerSocketId) {
-    //             io.to(ownerSocketId).emit('newOrder', {
-    //                 _id: newOrder._id,
-    //                 paymentMethod: newOrder.paymentMethod,
-    //                 user: newOrder.user,
-    //                 shopOrders: shopOrder,
-    //                 createdAt: newOrder.createdAt,
-    //                 deliveryAddress: newOrder.deliveryAddress,
-    //                 payment: newOrder.payment
-    //             })
-    //         }
-    //     });
-    // }
+    if (io) {
+      newOrder.shopOrders.forEach((shopOrder) => {
+        const ownerSocketId = shopOrder.owner.socketId;
+        if (ownerSocketId) {
+          io.to(ownerSocketId).emit("newOrder", {
+            _id: newOrder._id,
+            paymentMethod: newOrder.paymentMethod,
+            user: newOrder.user,
+            shopOrders: shopOrder,
+            createdAt: newOrder.createdAt,
+            deliveryAddress: newOrder.deliveryAddress,
+            payment: newOrder.payment,
+          });
+        }
+      });
+    }
 
     return res.status(201).json(newOrder);
   } catch (error) {
     console.log("Place order error:", error);
-    return res
-      .status(500)
-      .json({ message: `Place order error: ${error.message}` });
+    return res.status(500).json({ message: `Place order error: ${error}` });
+  }
+};
+
+export const verifyPayment = async (req, res) => {
+  try {
+    const { razorpay_payment_id, orderId } = req.body;
+    const payment = await instance.payments.fetch(razorpay_payment_id);
+    if (!payment || payment.status != "captured") {
+      return res.status(400).json({ message: "payment not captured" });
+    }
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(400).json({ message: "order not found" });
+    }
+
+    order.payment = true;
+    order.razorpayPaymentId = razorpay_payment_id;
+    await order.save();
+
+    await order.populate(
+      "shopOrders.shopOrderItems.item",
+      "foodName image price"
+    );
+    await order.populate("shopOrders.shop", "shopName");
+    await order.populate("shopOrders.owner", "fullName socketId");
+    await order.populate("user", "fullName email contact");
+
+    const io = req.app.get("io");
+
+    if (io) {
+      order.shopOrders.forEach((shopOrder) => {
+        const ownerSocketId = shopOrder.owner.socketId;
+        if (ownerSocketId) {
+          io.to(ownerSocketId).emit("newOrder", {
+            _id: order._id,
+            paymentMethod: order.paymentMethod,
+            user: order.user,
+            shopOrders: shopOrder,
+            createdAt: order.createdAt,
+            deliveryAddress: order.deliveryAddress,
+            payment: order.payment,
+          });
+        }
+      });
+    }
+
+    return res.status(200).json(order);
+  } catch (error) {
+    return res.status(500).json({ message: `verify payment  error ${error}` });
   }
 };
 
@@ -235,28 +287,29 @@ export const updateOrderStatus = async (req, res) => {
 
       await deliveryAssignment.populate("order");
       await deliveryAssignment.populate("shop");
-      //   const io = req.app.get("io");
-      //   if (io) {
-      //     availableBoys.forEach((boy) => {
-      //       const boySocketId = boy.socketId;
-      //       if (boySocketId) {
-      //         io.to(boySocketId).emit("newAssignment", {
-      //           sentTo: boy._id,
-      //           assignmentId: deliveryAssignment._id,
-      //           orderId: deliveryAssignment.order._id,
-      //           shopName: deliveryAssignment.shop.shopName,
-      //           deliveryAddress: deliveryAssignment.order.deliveryAddress,
-      //           items:
-      //             deliveryAssignment.order.shopOrders.find((so) =>
-      //               so._id.equals(deliveryAssignment.shopOrderId)
-      //             ).shopOrderItems || [],
-      //           subtotal: deliveryAssignment.order.shopOrders.find((so) =>
-      //             so._id.equals(deliveryAssignment.shopOrderId)
-      //           )?.subtotal,
-      //         });
-      //       }
-      //     });
-      //   }
+
+      const io = req.app.get("io");
+      if (io) {
+        availableBoys.forEach((boy) => {
+          const boySocketId = boy.socketId;
+          if (boySocketId) {
+            io.to(boySocketId).emit("newAssignment", {
+              sentTo: boy._id,
+              assignmentId: deliveryAssignment._id,
+              orderId: deliveryAssignment.order._id,
+              shopName: deliveryAssignment.shop.shopName,
+              deliveryAddress: deliveryAssignment.order.deliveryAddress,
+              items:
+                deliveryAssignment.order.shopOrders.find((so) =>
+                  so._id.equals(deliveryAssignment.shopOrderId)
+                ).shopOrderItems || [],
+              subtotal: deliveryAssignment.order.shopOrders.find((so) =>
+                so._id.equals(deliveryAssignment.shopOrderId)
+              )?.subtotal,
+            });
+          }
+        });
+      }
     }
 
     await order.save();
@@ -266,20 +319,20 @@ export const updateOrderStatus = async (req, res) => {
       "shopOrders.assignedDeliveryBoy",
       "fullName email contact"
     );
-    // await order.populate("user", "socketId")
+    await order.populate("user", "socketId");
 
-    // const io = req.app.get('io')
-    // if (io) {
-    //     const userSocketId = order.user.socketId
-    //     if (userSocketId) {
-    //         io.to(userSocketId).emit('update-status', {
-    //             orderId: order._id,
-    //             shopId: updatedShopOrder.shop._id,
-    //             status: updatedShopOrder.status,
-    //             userId: order.user._id
-    //         })
-    //     }
-    // }
+    const io = req.app.get("io");
+    if (io) {
+      const userSocketId = order.user.socketId;
+      if (userSocketId) {
+        io.to(userSocketId).emit("update-status", {
+          orderId: order._id,
+          shopId: updatedShopOrder.shop._id,
+          status: updatedShopOrder.status,
+          userId: order.user._id,
+        });
+      }
+    }
 
     return res.status(200).json({
       shopOrder: updatedShopOrder,
@@ -446,5 +499,111 @@ export const getOrderById = async (req, res) => {
     return res.status(200).json(order);
   } catch (error) {
     return res.status(500).json({ message: `Get by id order error ${error}` });
+  }
+};
+
+export const sendDeliveryOtp = async (req, res) => {
+  try {
+    const { orderId, shopOrderId } = req.body;
+    const order = await Order.findById(orderId).populate("user");
+    const shopOrder = order.shopOrders.id(shopOrderId);
+    if (!order || !shopOrder) {
+      return res.status(400).json({ message: "enter valid order/shopOrderid" });
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    shopOrder.deliveryOtp = otp;
+    shopOrder.otpExpires = Date.now() + 5 * 60 * 1000;
+
+    await order.save();
+    await sendDeliveryOtpMail(order.user, otp);
+
+    return res
+      .status(200)
+      .json({ message: `Otp sent Successfuly to ${order?.user?.fullName}` });
+  } catch (error) {
+    return res.status(500).json({ message: `delivery otp error ${error}` });
+  }
+};
+
+export const verifyDeliveryOtp = async (req, res) => {
+  try {
+    const { orderId, shopOrderId, otp } = req.body;
+    const order = await Order.findById(orderId).populate("user");
+
+    const shopOrder = order.shopOrders.id(shopOrderId);
+    if (!order || !shopOrder) {
+      return res.status(400).json({ message: "enter valid order/shopOrderid" });
+    }
+
+    if (
+      shopOrder.deliveryOtp !== otp ||
+      !shopOrder.otpExpires ||
+      shopOrder.otpExpires < Date.now()
+    ) {
+      return res.status(400).json({ message: "Invalid/Expired Otp" });
+    }
+
+    shopOrder.status = "delivered";
+    shopOrder.deliveredAt = Date.now();
+
+    await order.save();
+    await DeliveryAssignment.deleteOne({
+      shopOrderId: shopOrder._id,
+      order: order._id,
+      assignedTo: shopOrder.assignedDeliveryBoy,
+    });
+
+    return res.status(200).json({ message: "Order Delivered Successfully!" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `verify delivery otp error ${error}` });
+  }
+};
+
+export const getTodayDeliveries = async (req, res) => {
+  try {
+    const deliveryBoyId = req.userId;
+    const startsOfDay = new Date();
+    startsOfDay.setHours(0, 0, 0, 0);
+
+    const orders = await Order.find({
+      "shopOrders.assignedDeliveryBoy": deliveryBoyId,
+      "shopOrders.status": "delivered",
+      "shopOrders.deliveredAt": { $gte: startsOfDay },
+    }).lean();
+
+    let todaysDeliveries = [];
+
+    orders.forEach((order) => {
+      order.shopOrders.forEach((shopOrder) => {
+        if (
+          shopOrder.assignedDeliveryBoy == deliveryBoyId &&
+          shopOrder.status == "delivered" &&
+          shopOrder.deliveredAt &&
+          shopOrder.deliveredAt >= startsOfDay
+        ) {
+          todaysDeliveries.push(shopOrder);
+        }
+      });
+    });
+
+    let stats = {};
+
+    todaysDeliveries.forEach((shopOrder) => {
+      const hour = new Date(shopOrder.deliveredAt).getHours();
+      stats[hour] = (stats[hour] || 0) + 1;
+    });
+
+    let formattedStats = Object.keys(stats).map((hour) => ({
+      hour: parseInt(hour),
+      count: stats[hour],
+    }));
+
+    formattedStats.sort((a, b) => a.hour - b.hour);
+    return res.status(200).json(formattedStats);
+  } catch (error) {
+    return res.status(500).json({ message: `today deliveries error ${error}` });
   }
 };

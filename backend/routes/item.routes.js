@@ -5,6 +5,9 @@ import {
   getItemById,
   deleteItem,
   getItemsByCity,
+  getItemsByShop,
+  searchItems,
+  rating,
 } from "../controllers/item.controllers.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -25,7 +28,7 @@ itemRouter.post(
   itemValidation,
   itemCreateController
 );
-itemRouter.put(
+itemRouter.post(
   "/edit-item/:itemId",
   authMiddleware,
   upload.single("image"),
@@ -36,5 +39,8 @@ itemRouter.put(
 itemRouter.get("/getItem-by-id/:itemId", authMiddleware, getItemById);
 itemRouter.delete("/delete-item/:itemId", authMiddleware, deleteItem);
 itemRouter.get("/getItems-by-city/:city",authMiddleware, getItemsByCity);
+itemRouter.get("/get-by-shop/:shopId",authMiddleware,getItemsByShop);
+itemRouter.get("/search-items", authMiddleware, searchItems);
+itemRouter.post("/rating", authMiddleware, rating);
 
 export default itemRouter;

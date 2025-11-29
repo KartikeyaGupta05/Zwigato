@@ -25,32 +25,32 @@ function DeliveryBoyDashboard() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // useEffect(() => {
-  // if (!socket || userData.role !== "deliveryBoy") return;/
-  //   let watchId;
-  //   if (navigator.geolocation) {
-  //     (watchId = navigator.geolocation.watchPosition((position) => {
-  //       const latitude = position.coords.latitude;
-  //       const longitude = position.coords.longitude;
-  //       setDeliveryBoyLocation({ lat: latitude, lon: longitude });
-  //       socket.emit("updateLocation", {
-  //         latitude,
-  //         longitude,
-  //         userId: userData._id,
-  //       });
-  //     })),
-  //       (error) => {
-  //         console.log(error);
-  //       },
-  //       {
-  //         enableHighAccuracy: true,
-  //       };
-  //   }
+  useEffect(() => {
+    if (!socket || userData.role !== "deliveryBoy") return;
+    let watchId;
+    if (navigator.geolocation) {
+      (watchId = navigator.geolocation.watchPosition((position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        setDeliveryBoyLocation({ lat: latitude, lon: longitude });
+        socket.emit("updateLocation", {
+          latitude,
+          longitude,
+          userId: userData._id,
+        });
+      })),
+        (error) => {
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: true,
+        };
+    }
 
-  //   return () => {
-  //     if (watchId) navigator.geolocation.clearWatch(watchId);
-  //   };
-  // }, [socket, userData]);
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [socket, userData]);
 
   const ratePerDelivery = 50;
   const totalEarning = todayDeliveries.reduce(
@@ -100,14 +100,14 @@ function DeliveryBoyDashboard() {
     }
   };
 
-  // useEffect(() => {
-  //   socket.on("newAssignment", (data) => {
-  //     setAvailableAssignments((prev) => [...prev, data]);
-  //   });
-  //   return () => {
-  //     socket.off("newAssignment");
-  //   };
-  // }, [socket]);
+  useEffect(() => {
+    socket.on("newAssignment", (data) => {
+      setAvailableAssignments((prev) => [...prev, data]);
+    });
+    return () => {
+      socket.off("newAssignment");
+    };
+  }, [socket]);
 
   const sendOtp = async () => {
     setLoading(true);
@@ -260,8 +260,8 @@ function DeliveryBoyDashboard() {
                 {currentOrder.deliveryAddress.text}
               </p>
               <p className="text-xs text-gray-400">
-                {currentOrder.shopOrder.shopOrderItems.length} items |{" "}
-                ₹{currentOrder.shopOrder.subtotal}
+                {currentOrder.shopOrder.shopOrderItems.length} items | ₹
+                {currentOrder.shopOrder.subtotal}
               </p>
             </div>
 

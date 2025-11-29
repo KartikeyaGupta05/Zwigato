@@ -25,7 +25,7 @@ shopRouter.post(
   shopValidation,
   shopCreateController
 );
-shopRouter.put(
+shopRouter.post(
   "/edit-shop/:shopId",
   authMiddleware,
   upload.single("image"),

@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addMyOrder } from "../redux/reducer/userSlice";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function RecenterMap({ location }) {
   if (location.lat && location.lon) {
@@ -42,11 +43,10 @@ function CheckOut() {
   };
 
   const getCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      dispatch(setLocation({ lat: latitude, lon: longitude }));
-      getAddressByLatLng(latitude, longitude);
-    });
+    const latitude = userData.user.location.coordinates[1];
+    const longitude = userData.user.location.coordinates[0];
+    dispatch(setLocation({ lat: latitude, lon: longitude }));
+    getAddressByLatLng(latitude, longitude);
   };
 
   const getAddressByLatLng = async (lat, lng) => {
@@ -93,46 +93,45 @@ function CheckOut() {
       if (paymentMethod == "cod") {
         dispatch(addMyOrder(response.data));
         navigate("/order-placed");
-      } 
-      // else {
-      //   const orderId = response.data.orderId;
-      //   const razorOrder = response.data.razorOrder;
-      //   openRazorpayWindow(orderId, razorOrder);
-      // }
+      } else {
+        const orderId = response.data.orderId;
+        const razorOrder = response.data.razorOrder;
+        openRazorpayWindow(orderId, razorOrder);
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
-  //   const openRazorpayWindow = (orderId, razorOrder) => {
-  //     const options = {
-  //       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-  //       amount: razorOrder.amount,
-  //       currency: "INR",
-  //       name: "Vingo",
-  //       description: "Food Delivery Website",
-  //       order_id: razorOrder.id,
-  //       handler: async function (response) {
-  //         try {
-  //           const result = await axios.post(
-  //             `${serverUrl}/api/order/verify-payment`,
-  //             {
-  //               razorpay_payment_id: response.razorpay_payment_id,
-  //               orderId,
-  //             },
-  //             { withCredentials: true }
-  //           );
-  //           dispatch(addMyOrder(result.data));
-  //           navigate("/order-placed");
-  //         } catch (error) {
-  //           console.log(error);
-  //         }
-  //       },
-  //     };
+  const openRazorpayWindow = (orderId, razorOrder) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: razorOrder.amount,
+      currency: "INR",
+      name: "Zwigato",
+      description: "Food Delivery Website",
+      order_id: razorOrder.id,
+      handler: async function (response) {
+        try {
+          const result = await axios.post(
+            `${import.meta.env.VITE_BASE_URL}/api/order/verify-payment`,
+            {
+              razorpay_payment_id: response.razorpay_payment_id,
+              orderId,
+            },
+            { withCredentials: true }
+          );
+          dispatch(addMyOrder(result.data));
+          navigate("/order-placed");
+        } catch (error) {
+          toast.error("Payment verification failed. Please contact support.");
+        }
+      },
+    };
 
-  //     const rzp = new window.Razorpay(options);
-  //     rzp.open();
-  //   };
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
 
   useEffect(() => {
     setAddressInput(address);
@@ -265,20 +264,20 @@ function CheckOut() {
             <hr className="border-gray-200 my-2" />
             <div className="flex justify-between font-medium text-gray-800">
               <span>Subtotal</span>
-              <span>{totalAmount}</span>
+              <span>₹{totalAmount}</span>
             </div>
             <div className="flex justify-between text-gray-700">
               <span>Delivery Fee</span>
-              <span>{deliveryFee == 0 ? "Free" : deliveryFee}</span>
+              <span>{deliveryFee == 0 ? "Free" : `₹${deliveryFee}`}</span>
             </div>
             <div className="flex justify-between text-lg font-bold text-[#ff4d2d] pt-2">
               <span>Total</span>
-              <span>{AmountWithDeliveryFee}</span>
+              <span>₹{AmountWithDeliveryFee}</span>
             </div>
           </div>
         </section>
         <button
-          className="w-full bg-[#ff4d2d] hover:bg-[#e64526] text-white py-3 rounded-xl font-semibold"
+          className="w-full bg-[#ff4d2d] hover:bg-[#e64526] text-white py-3 cursor-pointer rounded-xl font-semibold"
           onClick={handlePlaceOrder}
         >
           {" "}

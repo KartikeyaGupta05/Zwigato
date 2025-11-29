@@ -58,7 +58,7 @@ const EditShop = () => {
         formData.append("image", backendImage);
       }
 
-      const response = await axios.put(
+      const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/api/shop/edit-shop/${shopId}`,
         formData,
         { withCredentials: true }

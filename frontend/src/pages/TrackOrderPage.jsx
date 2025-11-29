@@ -9,7 +9,7 @@ function TrackOrderPage() {
   const { orderId } = useParams();
   const [currentOrder, setCurrentOrder] = useState();
   const navigate = useNavigate();
-  //   const { socket } = useSelector((state) => state.user);
+  const { socket } = useSelector((state) => state.user);
   const [liveLocations, setLiveLocations] = useState({});
 
   const handleGetOrder = async () => {
@@ -24,17 +24,17 @@ function TrackOrderPage() {
     }
   };
 
-  //   useEffect(() => {
-  //     socket.on(
-  //       "updateDeliveryLocation",
-  //       ({ deliveryBoyId, latitude, longitude }) => {
-  //         setLiveLocations((prev) => ({
-  //           ...prev,
-  //           [deliveryBoyId]: { lat: latitude, lon: longitude },
-  //         }));
-  //       }
-  //     );
-  //   }, [socket]);
+  useEffect(() => {
+    socket.on(
+      "updateDeliveryLocation",
+      ({ deliveryBoyId, latitude, longitude }) => {
+        setLiveLocations((prev) => ({
+          ...prev,
+          [deliveryBoyId]: { lat: latitude, lon: longitude },
+        }));
+      }
+    );
+  }, [socket]);
 
   useEffect(() => {
     handleGetOrder();
@@ -102,8 +102,10 @@ function TrackOrderPage() {
                     deliveryBoyLocation: liveLocations[
                       shopOrder.assignedDeliveryBoy._id
                     ] || {
-                      lat: shopOrder.assignedDeliveryBoy.location.coordinates[1],
-                      lon: shopOrder.assignedDeliveryBoy.location.coordinates[0],
+                      lat: shopOrder.assignedDeliveryBoy.location
+                        .coordinates[1],
+                      lon: shopOrder.assignedDeliveryBoy.location
+                        .coordinates[0],
                     },
                     customerLocation: {
                       lat: currentOrder.deliveryAddress.latitude,

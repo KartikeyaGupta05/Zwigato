@@ -53,7 +53,7 @@ const EditItem = () => {
       formData.append("category", category);
       formData.append("foodType", foodType);
       if (backendImage) formData.append("image", backendImage);
-      const response = await axios.put(
+      const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/api/item/edit-item/${itemId}`,
         formData,
         {

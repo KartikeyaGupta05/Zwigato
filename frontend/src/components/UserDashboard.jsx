@@ -2,12 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import UserNavbar from "./UserNavbar";
 import { categories } from "../category";
 import CategoryCard from "./CategoryCard";
-import { FaCircleChevronLeft, FaCircleChevronRight } from "react-icons/fa6";
 import theme from "../theme";
 import { useSelector } from "react-redux";
+import { FaCircleChevronLeft, FaCircleChevronRight } from "react-icons/fa6";
 import ItemCard from "./ItemCard";
+import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
+  const { userCity, shopsInMyCity, itemsInMyCity, searchItems } = useSelector(
+    (state) => state.user
+  );
   const catScrollRef = useRef(null);
   const shopScrollRef = useRef(null);
   const itemScrollRef = useRef(null);
@@ -15,7 +19,23 @@ const UserDashboard = () => {
   const [showRightCatButton, setShowRightCatButton] = useState(true);
   const [showLeftShopButton, setShowLeftShopButton] = useState(false);
   const [showRightShopButton, setShowRightShopButton] = useState(false);
-  const { userCity, shopsInMyCity, itemsInMyCity } = useSelector((state) => state.user);
+  const [updatedItemsList, setUpdatedItemsList] = useState([]);
+  const navigate = useNavigate();
+
+  const handleFilterByCategory = (category) => {
+    if (category == "All") {
+      setUpdatedItemsList(itemsInMyCity.items);
+    } else {
+      const filteredList = itemsInMyCity.items.filter(
+        (i) => i.category === category
+      );
+      setUpdatedItemsList(filteredList);
+    }
+  };
+
+  useEffect(() => {
+    setUpdatedItemsList(itemsInMyCity?.items);
+  }, [itemsInMyCity]);
 
   const updateButtonVisibility = (ref, setLeftButton, setRightButton) => {
     const element = ref.current;
@@ -56,12 +76,24 @@ const UserDashboard = () => {
         );
       });
     }
-    
   }, []);
 
   return (
     <div className="w-screen min-h-screen flex flex-col gap-5 items-center bg-[#fff9f6] overflow-y-auto">
       <UserNavbar />
+
+      {searchItems && searchItems.length > 0 && (
+        <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-5 bg-white shadow-md rounded-2xl mt-4">
+          <h1 className="text-gray-900 text-2xl sm:text-3xl font-semibold border-b border-gray-200 pb-2">
+            Search Results
+          </h1>
+          <div className="w-full h-auto flex flex-wrap gap-6 justify-center">
+            {searchItems.map((item) => (
+              <ItemCard data={item} key={item._id} />
+            ))}
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-2.5 mt-30">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">
           Inspiration for your first order
@@ -79,10 +111,15 @@ const UserDashboard = () => {
           )}
           <div
             ref={catScrollRef}
-            className="w-full flex overflow-x-auto gap-4 pb-2"
+            className="w-full flex cursor-pointer overflow-x-auto gap-4 pb-2"
           >
             {categories.map((cate, index) => (
-              <CategoryCard name={cate.category} image={cate.image} key={index} />
+              <CategoryCard
+                name={cate.category}
+                image={cate.image}
+                key={index}
+                onClick={() => handleFilterByCategory(cate.category)}
+              />
             ))}
           </div>
           {showRightCatButton && (
@@ -117,13 +154,14 @@ const UserDashboard = () => {
             shopsInMyCity.shops.length > 0 && (
               <div
                 ref={shopScrollRef}
-                className="w-full flex overflow-x-auto gap-4 pb-2"
+                className="w-full flex cursor-pointer overflow-x-auto gap-4 pb-2"
               >
                 {shopsInMyCity.shops.map((shop, index) => (
                   <CategoryCard
                     key={index}
                     name={shop.shopName}
                     image={shop.image}
+                    onClick={() => navigate(`/shop/${shop._id}`)}
                   />
                 ))}
               </div>
@@ -146,15 +184,12 @@ const UserDashboard = () => {
           Popular Items in {userCity}
         </h1>
 
-        <div className="w-full h-auto flex flex-wrap gap-4 justify-center" >
+        <div className="w-full h-auto flex flex-wrap gap-4 justify-center">
           {itemsInMyCity &&
             itemsInMyCity.items &&
             itemsInMyCity.items.length > 0 &&
-            itemsInMyCity.items.map((item, index) => (
-              <ItemCard
-                key={index}
-                data={item}
-              />
+            updatedItemsList?.map((item, index) => (
+              <ItemCard key={index} data={item} />
             ))}
         </div>
       </div>

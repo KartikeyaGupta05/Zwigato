@@ -43,7 +43,9 @@ function UserOrderCard({ data }) {
         <div className="text-right">
           {data.paymentMethod == "cod" ? (
             <p className="text-sm text-gray-500">
-              {data.paymentMethod?.toUpperCase() === "COD" ? "Cash on Delivery" : "Prepaid"}
+              {data.paymentMethod?.toUpperCase() === "COD"
+                ? "Cash on Delivery"
+                : "Prepaid"}
             </p>
           ) : (
             <p className="text-sm text-gray-500 font-semibold">
@@ -62,7 +64,9 @@ function UserOrderCard({ data }) {
           className='"border rounded-lg p-3 bg-[#fffaf7] space-y-3'
           key={index}
         >
-          <p className="text-xl font-bold text-orange-500">{shopOrder.shop.shopName}</p>
+          <p className="text-xl font-bold text-orange-500">
+            {shopOrder.shop.shopName}
+          </p>
 
           <div className="flex space-x-4 overflow-x-auto pb-2">
             {shopOrder.shopOrderItems.map((item, index) => (

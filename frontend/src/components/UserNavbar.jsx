@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaLocationDot, FaPlus } from "react-icons/fa6";
 import { FcSearch } from "react-icons/fc";
 import { FaShoppingCart } from "react-icons/fa";
@@ -8,13 +8,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../redux/reducer/userSlice";
+import { setSearchItems, setUserData } from "../redux/reducer/userSlice";
 import { toast } from "react-toastify";
 
 const UserNavbar = () => {
   const { userData, userCity, cartItems } = useSelector((state) => state.user);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [query, setQuery] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -30,6 +32,28 @@ const UserNavbar = () => {
       toast.error("Failed to log out");
     }
   };
+
+  const handleSearchItems = async () => {
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/api/item/search-items?query=${query}&city=${userCity}`,
+        { withCredentials: true }
+      );
+      dispatch(setSearchItems(response.data));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (query) {
+      handleSearchItems();
+    } else {
+      dispatch(setSearchItems(null));
+    }
+  }, [query]);
 
   return (
     <div className="w-full h-20 flex items-center justify-between md:justify-center gap-[30px] px-5 fixed top-0 z-9999 bg-[#fff9f6] overflow-visible shadow-md">
@@ -49,6 +73,8 @@ const UserNavbar = () => {
               className="outline-0 w-full "
               type="text"
               placeholder="Search Delicious food here..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
         </div>
@@ -76,6 +102,8 @@ const UserNavbar = () => {
             className="outline-0 w-full "
             type="text"
             placeholder="Search Delicious food here..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </div>
       </div>

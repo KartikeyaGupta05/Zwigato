@@ -14,24 +14,25 @@ function MyOrders() {
   const { userData, myOrders, socket } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // useEffect(() => {
-  //   socket?.on("newOrder", (data) => {
-  //     if (data.shopOrders?.owner._id == userData._id) {
-  //       dispatch(setMyOrders([data, ...myOrders]));
-  //     }
-  //   });
 
-  //   socket?.on("update-status", ({ orderId, shopId, status, userId }) => {
-  //     if (userId == userData._id) {
-  //       dispatch(updateRealtimeOrderStatus({ orderId, shopId, status }));
-  //     }
-  //   });
+  useEffect(() => {
+    socket?.on("newOrder", (data) => {
+      if (data.shopOrders?.owner._id == userData._id) {
+        dispatch(setMyOrders([data, ...myOrders]));
+      }
+    });
 
-  //   return () => {
-  //     socket?.off("newOrder");
-  //     socket?.off("update-status");
-  //   };
-  // }, [socket]);
+    socket?.on("update-status", ({ orderId, shopId, status, userId }) => {
+      if (userId == userData._id) {
+        dispatch(updateRealtimeOrderStatus({ orderId, shopId, status }));
+      }
+    });
+
+    return () => {
+      socket?.off("newOrder");
+      socket?.off("update-status");
+    };
+  }, [socket]);
 
   return (
     <div className='"w-full min-h-screen bg-[#fff9f6] flex justify-center px-4'>
