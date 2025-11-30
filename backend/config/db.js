@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-function connectToDb() {
-  mongoose.connect(process.env.MONGO_URI)
+function connectDb() {
+  mongoose.connect(process.env.MONGODB_URL)
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => console.log("❌ MongoDB connection error:", err));
 }
 
-export default connectToDb;
+export default connectDb;

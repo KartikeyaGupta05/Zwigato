@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { serverUrl } from "../App";
 
 function UserOrderCard({ data }) {
   const navigate = useNavigate();
-  const [selectedRating, setSelectedRating] = useState({});
+  const [selectedRating, setSelectedRating] = useState({}); //itemId:rating
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -17,8 +18,8 @@ function UserOrderCard({ data }) {
 
   const handleRating = async (itemId, rating) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/item/rating`,
+      const result = await axios.post(
+        `${serverUrl}/api/item/rating`,
         { itemId, rating },
         { withCredentials: true }
       );
@@ -43,9 +44,7 @@ function UserOrderCard({ data }) {
         <div className="text-right">
           {data.paymentMethod == "cod" ? (
             <p className="text-sm text-gray-500">
-              {data.paymentMethod?.toUpperCase() === "COD"
-                ? "Cash on Delivery"
-                : "Prepaid"}
+              {data.paymentMethod?.toUpperCase()}
             </p>
           ) : (
             <p className="text-sm text-gray-500 font-semibold">
@@ -53,7 +52,7 @@ function UserOrderCard({ data }) {
             </p>
           )}
 
-          <p className="font-medium text-blue-600">
+          <p className="font-medium capitalize text-blue-600">
             {data.shopOrders?.[0].status}
           </p>
         </div>
@@ -64,22 +63,17 @@ function UserOrderCard({ data }) {
           className='"border rounded-lg p-3 bg-[#fffaf7] space-y-3'
           key={index}
         >
-          <p className="text-xl font-bold text-orange-500">
-            {shopOrder.shop.shopName}
-          </p>
+          <p>{shopOrder.shop.name}</p>
 
           <div className="flex space-x-4 overflow-x-auto pb-2">
             {shopOrder.shopOrderItems.map((item, index) => (
               <div
                 key={index}
-                className='shrink-0 w-40 border rounded-lg p-2 bg-white"'
+                className='flex-shrink-0 w-40 border rounded-lg p-2 bg-white"'
               >
                 <img
-                  src={
-                    item.item?.image ||
-                    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjE3MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmY0ZDJkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Gb29kIEl0ZW08L3RleHQ+PC9zdmc+"
-                  }
-                  alt={item.name || "Food item"}
+                  src={item.item.image}
+                  alt=""
                   className="w-full h-24 object-cover rounded"
                 />
                 <p className="text-sm font-semibold mt-1">{item.name}</p>
@@ -108,7 +102,7 @@ function UserOrderCard({ data }) {
           </div>
           <div className="flex justify-between items-center border-t pt-2">
             <p className="font-semibold">Subtotal: ₹{shopOrder.subtotal}</p>
-            <span className="text-sm font-medium text-blue-600">
+            <span className="text-sm capitalize font-medium text-blue-600">
               {shopOrder.status}
             </span>
           </div>

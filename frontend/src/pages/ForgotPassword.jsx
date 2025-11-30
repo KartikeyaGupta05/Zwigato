@@ -1,214 +1,212 @@
-import React, { useState } from "react";
-import theme from "../theme";
-import { Link, useNavigate } from "react-router-dom";
-import { GoArrowLeft } from "react-icons/go";
 import axios from "axios";
-import { toast } from "react-toastify";
+import React, { useState, useRef } from "react";
+import { IoIosArrowRoundBack } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+import { serverUrl } from "../App";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
-const ForgotPassword = () => {
+function ForgotPassword() {
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [otps, setOtps] = useState("");
+  const [otp, setOtp] = useState(["", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [err, setErr] = useState("");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const submitHandlerSendOtp = async (e) => {
-    e.preventDefault();
+  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+
+  const getOtpString = () => otp.join("");
+
+  const handleSendOtp = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/auth/send-otp`,
+      await axios.post(
+        `${serverUrl}/api/auth/send-otp`,
         { email },
         { withCredentials: true }
       );
-
-      if (response.status === 200) {
-        toast.success("OTP sent to your email");
-        setStep(2);
-      }
-      setLoading(false);
+      toast.success("OTP sent successfully");
+      setErr("");
+      setStep(2);
     } catch (error) {
-      console.error("Error sending OTP:", error);
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error?.response?.data?.message || "Failed to send OTP");
     }
+    setLoading(false);
   };
 
-  const submitHandlerVerifyOtp = async (e) => {
-    e.preventDefault();
+  const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/auth/verify-otp`,
-        { email, otp: otps },
+      await axios.post(
+        `${serverUrl}/api/auth/verify-otp`,
+        { email, otp: getOtpString() },
         { withCredentials: true }
       );
+      setErr("");
       setStep(3);
-      setLoading(false);
+      toast.success("OTP verified successfully");
     } catch (error) {
-      console.error("Error verifying OTP:", error);
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error?.response?.data?.message || "Failed to verify OTP");
     }
+    setLoading(false);
   };
 
-  const submitHandlerResetPassword = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match");
-      setLoading(false);
-      return;
+      return setErr("Passwords do not match");
     }
+
+    setLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/auth/reset-password`,
+      await axios.post(
+        `${serverUrl}/api/auth/reset-password`,
         { email, newPassword },
         { withCredentials: true }
       );
-      toast.success("Password reset successful! Please login.");
-      setLoading(false);
-      navigate("/login");
+      setErr("");
+      navigate("/signin");
+      toast.success("Password reset successful! You can now sign in.");
     } catch (error) {
-      console.error("Error resetting password:", error);
-      setLoading(false);
-    } finally {
-      setLoading(false);
+      toast.error(error?.response?.data?.message || "Failed to reset password");
     }
+    setLoading(false);
+  };
+
+  const handleOtpChange = (value, index) => {
+    if (!/^[0-9]?$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 3) otpRefs[index + 1].current.focus();
+    if (!value && index > 0) otpRefs[index - 1].current.focus();
   };
 
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center p-4"
-      style={{ backgroundColor: theme.backgroundColor }}
-    >
-      <div className="bg-white p-3 shadow-lg md:w-[30%] w-full rounded  ">
-        <div className="flex items-center gap-28">
-          <Link to="/login" className="text-2xl">
-            <GoArrowLeft />
-          </Link>
-          <h1
-            className="font-bold text-xl"
-            style={{ color: theme.primaryColor }}
-          >
+    <div className="flex w-full items-center justify-center min-h-screen p-4 bg-[#fff9f6]">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-8 border border-gray-200">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <IoIosArrowRoundBack
+            size={32}
+            className="text-[#ff4d2d] cursor-pointer"
+            onClick={() => navigate("/signin")}
+          />
+          <h1 className="text-3xl font-bold text-[#ff4d2d] tracking-wide">
             Forgot Password
           </h1>
         </div>
-        {step == 1 && (
-          <form className="mt-5" onSubmit={submitHandlerSendOtp}>
-            <div className="text-center mb-4 font-semibold">
-              Enter your email address for password reset
-            </div>
-            <div className="flex flex-col">
-              <label className="text-md capitalize font-semibold tracking-tight leading-none">
-                email
+
+        {step === 1 && (
+          <div>
+            <div className="mb-6">
+              <label className="text-gray-700 font-medium mb-1 block">
+                Email
               </label>
               <input
-                className="border px-1 font-semibold tracking-tight leading-none py-2  rounded-md mt-1 border-zinc-300 "
                 type="email"
-                placeholder="Enter Your Email"
-                value={email}
+                className="w-full border rounded-lg px-3 py-2 border-gray-300 focus:border-[#ff4d2d] focus:ring-2 focus:ring-[#ff4d2d]/30 outline-none transition"
+                placeholder="Enter your Email"
                 onChange={(e) => setEmail(e.target.value)}
+                value={email}
               />
             </div>
+
             <button
-              className="text-md capitalize font-semibold flex items-center justify-center text-white tracking-tight leading-none bg-[rgb(240,107,41)] w-full mt-5 px-1 py-3.5 rounded"
+              className="w-full font-semibold cursor-pointer py-2 rounded-lg bg-[#ff4d2d] text-white hover:bg-[#e64323] transition"
+              onClick={handleSendOtp}
               disabled={loading}
-              type="submit"
             >
-              {loading ? (
-                <div className="flex items-center gap-1">
-                  <h1>please wait...</h1>
-                  <ClipLoader size={20} color="white" />
-                </div>
-              ) : (
-                "Sent OTP"
-              )}
+              {loading ? <ClipLoader size={20} color="white" /> : "Send OTP"}
             </button>
-          </form>
+
+            {err && <p className="text-red-500 text-center mt-3">*{err}</p>}
+          </div>
         )}
 
-        {step == 2 && (
-          <form className="mt-5" onSubmit={submitHandlerVerifyOtp}>
-            <div className="flex flex-col">
-              <label className="text-md capitalize font-semibold tracking-tight leading-none">
-                OTP
-              </label>
-              <input
-                className="border px-1 font-semibold tracking-tight leading-none py-2  rounded-md mt-1 border-zinc-300 "
-                type="text"
-                placeholder="Enter Your OTP"
-                value={otps}
-                onChange={(e) => setOtps(e.target.value)}
-              />
+        {step === 2 && (
+          <div>
+            <label className="text-gray-700 font-medium mb-3 block">
+              Enter OTP
+            </label>
+
+            {/* 4 OTP Inputs */}
+            <div className="flex justify-between gap-3 mb-6">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={otpRefs[index]}
+                  maxLength={1}
+                  className="w-14 h-14 text-center text-2xl font-semibold border rounded-lg border-gray-300 focus:border-[#ff4d2d] focus:ring-2 focus:ring-[#ff4d2d]/30 outline-none transition"
+                  value={digit}
+                  onChange={(e) => handleOtpChange(e.target.value, index)}
+                />
+              ))}
             </div>
+
             <button
-              className="text-md capitalize font-semibold flex items-center justify-center text-white tracking-tight leading-none bg-[rgb(240,107,41)] w-full mt-5 px-1 py-3.5 rounded"
+              className="w-full font-semibold cursor-pointer py-2 rounded-lg bg-[#ff4d2d] text-white hover:bg-[#e64323] transition"
+              onClick={handleVerifyOtp}
               disabled={loading}
-              type="submit"
             >
-              {loading ? (
-                <div className="flex items-center gap-1">
-                  <h1>please wait...</h1>
-                  <ClipLoader size={20} color="white" />
-                </div>
-              ) : (
-                "Verify OTP"
-              )}
+              {loading ? <ClipLoader size={20} color="white" /> : "Verify OTP"}
             </button>
-          </form>
+
+            {err && <p className="text-red-500 text-center mt-3">*{err}</p>}
+          </div>
         )}
 
-        {step == 3 && (
-          <form className="mt-5" onSubmit={submitHandlerResetPassword}>
-            <div className="flex flex-col">
-              <label className="text-md capitalize font-semibold tracking-tight leading-none">
-                New password
+        {/* STEP 3 – Reset Password */}
+        {step === 3 && (
+          <div>
+            <div className="mb-6">
+              <label className="text-gray-700 font-medium mb-1 block">
+                New Password
               </label>
               <input
-                className="border px-1 font-semibold tracking-tight leading-none py-2  rounded-md mt-1 border-zinc-300 "
                 type="password"
-                placeholder="New Password"
-                value={newPassword}
+                className="w-full border rounded-lg px-3 py-2 border-gray-300 focus:border-[#ff4d2d] focus:ring-2 focus:ring-[#ff4d2d]/30 outline-none transition"
+                placeholder="Enter new password"
                 onChange={(e) => setNewPassword(e.target.value)}
+                value={newPassword}
               />
             </div>
-            <div className="flex flex-col mt-5">
-              <label className="text-md capitalize font-semibold tracking-tight leading-none">
-                Confirm password
+
+            <div className="mb-6">
+              <label className="text-gray-700 font-medium mb-1 block">
+                Confirm Password
               </label>
               <input
-                className="border px-1 font-semibold tracking-tight leading-none py-2  rounded-md mt-1 border-zinc-300 "
                 type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
+                className="w-full border rounded-lg px-3 py-2 border-gray-300 focus:border-[#ff4d2d] focus:ring-2 focus:ring-[#ff4d2d]/30 outline-none transition"
+                placeholder="Confirm password"
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                value={confirmPassword}
               />
             </div>
+
             <button
-              className="text-md capitalize font-semibold flex items-center justify-center text-white tracking-tight leading-none bg-[rgb(240,107,41)] w-full mt-5 px-1 py-3.5 rounded"
+              className="w-full font-semibold cursor-pointer py-2 rounded-lg bg-[#ff4d2d] text-white hover:bg-[#e64323] transition"
+              onClick={handleResetPassword}
               disabled={loading}
-              type="submit"
             >
               {loading ? (
-                <div className="flex items-center gap-1">
-                  <h1>please wait...</h1>
-                  <ClipLoader size={20} color="white" />
-                </div>
+                <ClipLoader size={20} color="white" />
               ) : (
                 "Reset Password"
               )}
             </button>
-          </form>
+
+            {err && <p className="text-red-500 text-center mt-3">*{err}</p>}
+          </div>
         )}
       </div>
     </div>
   );
-};
+}
 
 export default ForgotPassword;

@@ -3,18 +3,17 @@ import { IoIosArrowRoundBack } from "react-icons/io";
 import { IoSearchOutline } from "react-icons/io5";
 import { TbCurrentLocation } from "react-icons/tb";
 import { IoLocationSharp } from "react-icons/io5";
-import { FaMobileScreenButton } from "react-icons/fa6";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import { useDispatch, useSelector } from "react-redux";
+import "leaflet/dist/leaflet.css";
+import { setAddress, setLocation } from "../redux/mapSlice";
 import { MdDeliveryDining } from "react-icons/md";
 import { FaCreditCard } from "react-icons/fa";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { setAddress, setLocation } from "../redux/reducer/mapSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { addMyOrder } from "../redux/reducer/userSlice";
 import axios from "axios";
-import { toast } from "react-toastify";
-
+import { FaMobileScreenButton } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+import { serverUrl } from "../App";
+import { addMyOrder, setTotalAmount } from "../redux/userSlice";
 function RecenterMap({ location }) {
   if (location.lat && location.lon) {
     const map = useMap();
@@ -32,8 +31,8 @@ function CheckOut() {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const apiKey = import.meta.env.VITE_GEO_API_KEY;
-  const deliveryFee = totalAmount > 500 ? 0 : 80;
+  const apiKey = import.meta.env.VITE_GEOAPIKEY;
+  const deliveryFee = totalAmount > 500 ? 0 : 40;
   const AmountWithDeliveryFee = totalAmount + deliveryFee;
 
   const onDragEnd = (e) => {
@@ -41,10 +40,9 @@ function CheckOut() {
     dispatch(setLocation({ lat, lon: lng }));
     getAddressByLatLng(lat, lng);
   };
-
   const getCurrentLocation = () => {
-    const latitude = userData.user.location.coordinates[1];
-    const longitude = userData.user.location.coordinates[0];
+    const latitude = userData.location.coordinates[1];
+    const longitude = userData.location.coordinates[0];
     dispatch(setLocation({ lat: latitude, lon: longitude }));
     getAddressByLatLng(latitude, longitude);
   };
@@ -54,7 +52,7 @@ function CheckOut() {
       const result = await axios.get(
         `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&format=json&apiKey=${apiKey}`
       );
-      dispatch(setAddress(result?.data?.results[0].formatted));
+      dispatch(setAddress(result?.data?.results[0].address_line2));
     } catch (error) {
       console.log(error);
     }
@@ -67,7 +65,7 @@ function CheckOut() {
           addressInput
         )}&apiKey=${apiKey}`
       );
-      const { lat, lon } = result?.data?.features[0].properties;
+      const { lat, lon } = result.data.features[0].properties;
       dispatch(setLocation({ lat, lon }));
     } catch (error) {
       console.log(error);
@@ -76,8 +74,8 @@ function CheckOut() {
 
   const handlePlaceOrder = async () => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/order/place-order`,
+      const result = await axios.post(
+        `${serverUrl}/api/order/place-order`,
         {
           paymentMethod,
           deliveryAddress: {
@@ -90,12 +88,13 @@ function CheckOut() {
         },
         { withCredentials: true }
       );
+
       if (paymentMethod == "cod") {
-        dispatch(addMyOrder(response.data));
+        dispatch(addMyOrder(result.data));
         navigate("/order-placed");
       } else {
-        const orderId = response.data.orderId;
-        const razorOrder = response.data.razorOrder;
+        const orderId = result.data.orderId;
+        const razorOrder = result.data.razorOrder;
         openRazorpayWindow(orderId, razorOrder);
       }
     } catch (error) {
@@ -110,11 +109,19 @@ function CheckOut() {
       currency: "INR",
       name: "Zwigato",
       description: "Food Delivery Website",
+      prefill: {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        contact: "9999999999",
+      },
       order_id: razorOrder.id,
+      theme: {
+        color: "#ff4d2d",
+      },
       handler: async function (response) {
         try {
           const result = await axios.post(
-            `${import.meta.env.VITE_BASE_URL}/api/order/verify-payment`,
+            `${serverUrl}/api/order/verify-payment`,
             {
               razorpay_payment_id: response.razorpay_payment_id,
               orderId,
@@ -124,7 +131,7 @@ function CheckOut() {
           dispatch(addMyOrder(result.data));
           navigate("/order-placed");
         } catch (error) {
-          toast.error("Payment verification failed. Please contact support.");
+          console.log(error);
         }
       },
     };
@@ -136,17 +143,13 @@ function CheckOut() {
   useEffect(() => {
     setAddressInput(address);
   }, [address]);
-
   return (
     <div className="min-h-screen bg-[#fff9f6] flex items-center justify-center p-6">
       <div
-        className=" absolute top-5 left-5 z-10"
-        onClick={() => navigate("/cart")}
+        className=" absolute top-[20px] left-[20px] z-[10]"
+        onClick={() => navigate("/")}
       >
-        <IoIosArrowRoundBack
-          size={35}
-          className="text-[#ff4d2d] cursor-pointer"
-        />
+        <IoIosArrowRoundBack size={35} className="text-[#ff4d2d]" />
       </div>
       <div className="w-full max-w-[900px] bg-white rounded-2xl shadow-xl p-6 space-y-6">
         <h1 className="text-2xl font-bold text-gray-800">Checkout</h1>
@@ -164,13 +167,13 @@ function CheckOut() {
               onChange={(e) => setAddressInput(e.target.value)}
             />
             <button
-              className="bg-[#ff4d2d] hover:bg-[#e64526] cursor-pointer text-white px-3 py-2 rounded-lg flex items-center justify-center"
+              className="bg-[#ff4d2d] hover:bg-[#e64526] text-white cursor-pointer px-3 py-2 rounded-lg flex items-center justify-center"
               onClick={getLatLngByAddress}
             >
               <IoSearchOutline size={17} />
             </button>
             <button
-              className="bg-blue-500 hover:bg-blue-600 cursor-pointer text-white px-3 py-2 rounded-lg flex items-center justify-center"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex cursor-pointer items-center justify-center"
               onClick={getCurrentLocation}
             >
               <TbCurrentLocation size={17} />
@@ -204,7 +207,7 @@ function CheckOut() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div
-              className={`flex items-center gap-3 cursor-pointer rounded-xl border p-4 text-left transition ${
+              className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
                 paymentMethod === "cod"
                   ? "border-[#ff4d2d] bg-orange-50 shadow"
                   : "border-gray-200 hover:border-gray-300"
@@ -222,7 +225,7 @@ function CheckOut() {
               </div>
             </div>
             <div
-              className={`flex items-center gap-3 cursor-pointer rounded-xl border p-4 text-left transition ${
+              className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
                 paymentMethod === "online"
                   ? "border-[#ff4d2d] bg-orange-50 shadow"
                   : "border-gray-200 hover:border-gray-300"
@@ -277,7 +280,7 @@ function CheckOut() {
           </div>
         </section>
         <button
-          className="w-full bg-[#ff4d2d] hover:bg-[#e64526] text-white py-3 cursor-pointer rounded-xl font-semibold"
+          className="w-full bg-[#ff4d2d] hover:bg-[#e64526] text-white cursor-pointer py-3 rounded-xl font-semibold"
           onClick={handlePlaceOrder}
         >
           {" "}

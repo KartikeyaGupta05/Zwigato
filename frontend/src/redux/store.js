@@ -1,8 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit';
-import userSlice from './reducer/userSlice';
-import ownerSlice from './reducer/ownerSlice';
-import mapSlice from './reducer/mapSlice';  
-
+import { configureStore } from "@reduxjs/toolkit";
+import userSlice from "./userSlice";
+import ownerSlice from "./ownerSlice";
+import mapSlice from "./mapSlice";
 export const store = configureStore({
   reducer: {
     user: userSlice,

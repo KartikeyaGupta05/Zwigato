@@ -1,30 +1,31 @@
-import "./App.css";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
-import Home from "./pages/Home.jsx";
-import ForgotPassword from "./pages/ForgotPassword.jsx";
-import CreatedShop from "./pages/CreatedShop.jsx";
-import EditShop from "./pages/EditShop.jsx";
-import AddItem from "./pages/AddItem.jsx";
-import EditItem from "./pages/EditItem.jsx";
-import CartPage from "./pages/CartPage.jsx";
-import CheckOut from "./pages/CheckOut.jsx";
-import OrderPlaced from "./pages/OrderPlaced.jsx";
-import MyOrders from "./pages/MyOrders.jsx";
-import TrackOrderPage from "./pages/TrackOrderPage.jsx";
-import Shop from "./pages/Shop.jsx";
+import React, { useEffect } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
+import ForgotPassword from "./pages/ForgotPassword";
+import Home from "./pages/Home";
+import CreateEditShop from "./pages/CreateEditShop";
+import AddItem from "./pages/AddItem";
+import EditItem from "./pages/EditItem";
+import CartPage from "./pages/CartPage";
+import CheckOut from "./pages/CheckOut";
+import OrderPlaced from "./pages/OrderPlaced";
+import MyOrders from "./pages/MyOrders";
+import TrackOrderPage from "./pages/TrackOrderPage";
+import Shop from "./pages/Shop";
+import useGetMyOrders from "./hooks/useGetMyOrders";
+import useUpdateLocation from "./hooks/useUpdateLocation";
+import useGetMyshop from "./hooks/useGetMyShop";
+import useGetShopByCity from "./hooks/useGetShopByCity";
+import useGetItemsByCity from "./hooks/useGetItemsByCity";
+import useGetCurrentUser from "./hooks/useGetCurrentUser";
+import useGetCity from "./hooks/useGetCity";
+import { useDispatch, useSelector } from "react-redux";
+import { io } from "socket.io-client";
+import { setSocket } from "./redux/userSlice";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useSelector, useDispatch } from "react-redux";
-import useGetCurrentUser from "./hooks/useGetCurrentUser.jsx";
-import useGetUserCity from "./hooks/useGetUserCity.jsx";
-import useGetMyShop from "./hooks/useGetMyShop.jsx";
-import useGetShopsByCity from "./hooks/useGetShopsByCity.jsx";
-import useGetItemsByCity from "./hooks/useGetItemsByCity.jsx";
-import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
-import useUpdateLocation from "./hooks/useUpdateLocation.jsx";
-import { setSocket } from "./redux/reducer/userSlice.js";
+
+export const serverUrl = "http://localhost:8000";
 
 const PublicRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
@@ -33,24 +34,22 @@ const PublicRoute = ({ children }) => {
 
 const ProtectedRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
-  return userData ? children : <Navigate to="/login" />;
+  return userData ? children : <Navigate to="/signin" />;
 };
 
 function App() {
   const { userData } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   useGetCurrentUser();
-  useGetUserCity();
-  useGetMyShop();
-  useGetShopsByCity();
+  useUpdateLocation();
+  useGetCity();
+  useGetMyshop();
+  useGetShopByCity();
   useGetItemsByCity();
   useGetMyOrders();
-  useUpdateLocation();
 
   useEffect(() => {
-    const socketInstance = io(`${import.meta.env.VITE_BASE_URL}`, {
-      withCredentials: true,
-    });
+    const socketInstance = io(serverUrl, { withCredentials: true });
     dispatch(setSocket(socketInstance));
     socketInstance.on("connect", () => {
       if (userData) {
@@ -58,7 +57,7 @@ function App() {
       }
     });
     return () => {
-      socketInstance.disconnect(); 
+      socketInstance.disconnect();
     };
   }, [userData?._id]);
 
@@ -66,18 +65,26 @@ function App() {
     <>
       <Routes>
         <Route
-          path="/login"
+          path="/signup"
           element={
             <PublicRoute>
-              <Login />
+              <SignUp />
             </PublicRoute>
           }
         />
         <Route
-          path="/register"
+          path="/signin"
           element={
             <PublicRoute>
-              <Register />
+              <SignIn />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
             </PublicRoute>
           }
         />
@@ -90,26 +97,10 @@ function App() {
           }
         />
         <Route
-          path="/forgot-password"
-          element={
-            <PublicRoute>
-              <ForgotPassword />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/create-shop"
+          path="/create-edit-shop"
           element={
             <ProtectedRoute>
-              <CreatedShop />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/edit-shop/:shopId"
-          element={
-            <ProtectedRoute>
-              <EditShop />
+              <CreateEditShop />
             </ProtectedRoute>
           }
         />
@@ -145,7 +136,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/order-placed"
           element={

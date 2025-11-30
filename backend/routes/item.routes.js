@@ -1,46 +1,26 @@
 import express from "express";
+
+import isAuth from "../middlewares/isAuth.js";
 import {
-  itemCreateController,
-  itemUpdatedController,
-  getItemById,
+  addItem,
   deleteItem,
-  getItemsByCity,
+  editItem,
+  getItemByCity,
+  getItemById,
   getItemsByShop,
-  searchItems,
   rating,
+  searchItems,
 } from "../controllers/item.controllers.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { upload } from "../middlewares/multer.middleware.js";
-import { body } from "express-validator";
+import { upload } from "../middlewares/multer.js";
 
 const itemRouter = express.Router();
-const itemValidation = [
-  body("foodName").notEmpty().withMessage("Food name is required"),
-  body("price").isNumeric().withMessage("Price must be a number"),
-  body("category").notEmpty().withMessage("Category is required"),
-  body("foodType").notEmpty().withMessage("Food type is required"),
-];
 
-itemRouter.post(
-  "/add-item",
-  authMiddleware,
-  upload.single("image"),
-  itemValidation,
-  itemCreateController
-);
-itemRouter.post(
-  "/edit-item/:itemId",
-  authMiddleware,
-  upload.single("image"),
-  itemValidation,
-  itemUpdatedController
-);
-
-itemRouter.get("/getItem-by-id/:itemId", authMiddleware, getItemById);
-itemRouter.delete("/delete-item/:itemId", authMiddleware, deleteItem);
-itemRouter.get("/getItems-by-city/:city",authMiddleware, getItemsByCity);
-itemRouter.get("/get-by-shop/:shopId",authMiddleware,getItemsByShop);
-itemRouter.get("/search-items", authMiddleware, searchItems);
-itemRouter.post("/rating", authMiddleware, rating);
-
+itemRouter.post("/add-item", isAuth, upload.single("image"), addItem);
+itemRouter.post("/edit-item/:itemId", isAuth, upload.single("image"), editItem);
+itemRouter.get("/delete/:itemId", isAuth, deleteItem);
+itemRouter.get("/get-by-id/:itemId", isAuth, getItemById);
+itemRouter.get("/get-by-city/:city", isAuth, getItemByCity);
+itemRouter.get("/get-by-shop/:shopId", isAuth, getItemsByShop);
+itemRouter.get("/search-items", isAuth, searchItems);
+itemRouter.post("/rating", isAuth, rating);
 export default itemRouter;

@@ -1,35 +1,31 @@
 import express from "express";
+import isAuth from "../middlewares/isAuth.js";
 import {
-  placeOrder,
-  verifyPayment,
-  getMyOrders,
-  updateOrderStatus,
-  getDeliveryBoyAssignment,
   acceptOrder,
   getCurrentOrder,
+  getDeliveryBoyAssignment,
+  getMyOrders,
   getOrderById,
-  sendDeliveryOtp,
-  verifyDeliveryOtp,
   getTodayDeliveries,
+  placeOrder,
+  sendDeliveryOtp,
+  updateOrderStatus,
+  verifyDeliveryOtp,
+  verifyPayment,
 } from "../controllers/order.controllers.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const orderRouter = express.Router();
 
-orderRouter.post("/place-order", authMiddleware, placeOrder);
-orderRouter.post("/verify-payment",authMiddleware,verifyPayment);
-orderRouter.get("/my-orders", authMiddleware, getMyOrders);
-orderRouter.get("/get-assignments", authMiddleware, getDeliveryBoyAssignment);
-orderRouter.get("/get-current-order", authMiddleware, getCurrentOrder);
-orderRouter.post("/send-delivery-otp", authMiddleware, sendDeliveryOtp);
-orderRouter.post("/verify-delivery-otp", authMiddleware, verifyDeliveryOtp);
-orderRouter.get('/get-today-deliveries',authMiddleware,getTodayDeliveries)
-orderRouter.post(
-  "/update-status/:orderId/:shopId",
-  authMiddleware,
-  updateOrderStatus
-);
-orderRouter.get("/accept-order/:assignmentId", authMiddleware, acceptOrder);
-orderRouter.get("/get-order-by-id/:orderId", authMiddleware, getOrderById);
+orderRouter.post("/place-order", isAuth, placeOrder);
+orderRouter.post("/verify-payment", isAuth, verifyPayment);
+orderRouter.get("/my-orders", isAuth, getMyOrders);
+orderRouter.get("/get-assignments", isAuth, getDeliveryBoyAssignment);
+orderRouter.get("/get-current-order", isAuth, getCurrentOrder);
+orderRouter.post("/send-delivery-otp", isAuth, sendDeliveryOtp);
+orderRouter.post("/verify-delivery-otp", isAuth, verifyDeliveryOtp);
+orderRouter.post("/update-status/:orderId/:shopId", isAuth, updateOrderStatus);
+orderRouter.get("/accept-order/:assignmentId", isAuth, acceptOrder);
+orderRouter.get("/get-order-by-id/:orderId", isAuth, getOrderById);
+orderRouter.get("/get-today-deliveries", isAuth, getTodayDeliveries);
 
 export default orderRouter;

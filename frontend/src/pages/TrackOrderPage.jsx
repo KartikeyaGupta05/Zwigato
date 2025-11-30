@@ -1,21 +1,22 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { serverUrl } from "../App";
+import { useEffect } from "react";
+import { useState } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import DeliveryBoyTracking from "../components/DeliveryBoyTracking";
 import { useSelector } from "react-redux";
-
 function TrackOrderPage() {
   const { orderId } = useParams();
   const [currentOrder, setCurrentOrder] = useState();
   const navigate = useNavigate();
   const { socket } = useSelector((state) => state.user);
   const [liveLocations, setLiveLocations] = useState({});
-
   const handleGetOrder = async () => {
     try {
       const result = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/api/order/get-order-by-id/${orderId}`,
+        `${serverUrl}/api/order/get-order-by-id/${orderId}`,
         { withCredentials: true }
       );
       setCurrentOrder(result.data);
@@ -39,11 +40,10 @@ function TrackOrderPage() {
   useEffect(() => {
     handleGetOrder();
   }, [orderId]);
-
   return (
     <div className="max-w-4xl mx-auto p-4 flex flex-col gap-6">
       <div
-        className="relative flex items-center gap-4 top-5 left-5 z-10 mb-2.5 cursor-pointer"
+        className="relative flex items-center gap-4 top-[20px] left-[20px] z-[10] mb-[10px]"
         onClick={() => navigate("/")}
       >
         <IoIosArrowRoundBack size={35} className="text-[#ff4d2d]" />
@@ -56,14 +56,14 @@ function TrackOrderPage() {
         >
           <div>
             <p className="text-lg font-bold mb-2 text-[#ff4d2d]">
-              {shopOrder.shop.shopName}
+              {shopOrder.shop.name}
             </p>
             <p className="font-semibold">
               <span>Items:</span>{" "}
               {shopOrder.shopOrderItems?.map((i) => i.name).join(",")}
             </p>
             <p>
-              <span className="font-semibold">Subtotal:</span> ₹
+              <span className="font-semibold">Subtotal:</span>{" "}
               {shopOrder.subtotal}
             </p>
             <p className="mt-6">
@@ -81,7 +81,7 @@ function TrackOrderPage() {
                   </p>
                   <p className="font-semibold">
                     <span>Delivery Boy contact No.:</span>{" "}
-                    {shopOrder.assignedDeliveryBoy.contact}
+                    {shopOrder.assignedDeliveryBoy.mobile}
                   </p>
                 </div>
               ) : (

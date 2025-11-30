@@ -1,39 +1,14 @@
-import express from "express";
-import {
-  shopCreateController,
-  shopUpdatedController,
-  getMyShopController,
-  getShopsByCity,
-} from "../controllers/shop.controllers.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { upload } from "../middlewares/multer.middleware.js";
+import express from "express"
+import { createEditShop, getMyShop, getShopByCity } from "../controllers/shop.controllers.js"
+import isAuth from "../middlewares/isAuth.js"
+import { upload } from "../middlewares/multer.js"
 
-import { body } from "express-validator";
 
-const shopRouter = express.Router();
-const shopValidation = [
-  body("shopName").notEmpty().withMessage("Shop name is required"),
-  body("state").notEmpty().withMessage("State is required"),
-  body("city").notEmpty().withMessage("City is required"),
-  body("address").notEmpty().withMessage("Address is required"),
-];
 
-shopRouter.post(
-  "/create-shop",
-  authMiddleware,
-  upload.single("image"),
-  shopValidation,
-  shopCreateController
-);
-shopRouter.post(
-  "/edit-shop/:shopId",
-  authMiddleware,
-  upload.single("image"),
-  shopValidation,
-  shopUpdatedController
-);
+const shopRouter=express.Router()
 
-shopRouter.get("/get-myShop", authMiddleware, getMyShopController);
-shopRouter.get("/get-shops-by-city/:city", getShopsByCity);
+shopRouter.post("/create-edit",isAuth,upload.single("image"),createEditShop)
+shopRouter.get("/get-my",isAuth,getMyShop)
+shopRouter.get("/get-by-city/:city",isAuth,getShopByCity)
 
-export default shopRouter;
+export default shopRouter
