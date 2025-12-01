@@ -25,7 +25,7 @@ import { io } from "socket.io-client";
 import { setSocket } from "./redux/userSlice";
 import { ToastContainer } from "react-toastify";
 
-export const serverUrl = "http://localhost:8000";
+export const serverUrl = "https://zwigato-backend-h1kn.onrender.com";
 
 const PublicRoute = ({ children }) => {
   const { userData } = useSelector((state) => state.user);
