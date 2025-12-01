@@ -170,11 +170,7 @@ function CreateEditShop() {
             disabled={loading}
             className="w-full bg-[#ff4d2d] text-white py-3 rounded-xl font-semibold shadow-md hover:bg-orange-600 active:scale-95 transition-all duration-200"
           >
-            {loading ? (
-              <ClipLoader size={20} color="white" />
-            ) : (
-              "Save"
-            )}
+            {loading ? <ClipLoader size={20} color="white" /> : "Save"}
           </button>
         </form>
       </div>

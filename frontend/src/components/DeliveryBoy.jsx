@@ -93,7 +93,6 @@ function DeliveryBoy() {
         `${serverUrl}/api/order/accept-order/${assignmentId}`,
         { withCredentials: true }
       );
-      console.log(result.data);
       await getCurrentOrder();
     } catch (error) {
       console.log(error);
@@ -125,7 +124,6 @@ function DeliveryBoy() {
       setShowOtpBox(true);
       setMessage("");
       setOtp(["", "", "", ""]);
-      console.log(result.data);
       setTimeout(() => otpRefs[0]?.current?.focus(), 80);
     } catch (error) {
       console.log(error);

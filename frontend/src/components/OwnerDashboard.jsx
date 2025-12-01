@@ -1,10 +1,10 @@
 import React from "react";
-import Nav from "./NaV.JSX";
+import Nav from "./Nav";
 import { useSelector } from "react-redux";
 import { FaUtensils } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { FaPen } from "react-icons/fa";
-import OwnerItemCard from "./ownerItemCard";
+import OwnerItemCard from "./OwnerItemCard";
 
 function OwnerDashboard() {
   const { myShopData } = useSelector((state) => state.owner);
@@ -14,7 +14,6 @@ function OwnerDashboard() {
     <div className="w-full min-h-screen bg-[#fff9f6] flex flex-col items-center">
       <Nav />
 
-      {/* When shop is NOT created */}
       {!myShopData && (
         <div className="flex justify-center items-center p-4 sm:p-6 mt-8">
           <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-6 border border-orange-100 hover:shadow-2xl transition-all">
@@ -38,7 +37,6 @@ function OwnerDashboard() {
         </div>
       )}
 
-      {/* When shop IS created */}
       {myShopData && (
         <div className="w-full flex flex-col items-center gap-8 px-4 sm:px-6 mt-10">
 
@@ -75,7 +73,6 @@ function OwnerDashboard() {
             </div>
           </div>
 
-          {/* If NO Items */}
           {myShopData.items.length === 0 && (
             <div className="flex justify-center items-center p-4 sm:p-6">
               <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-6 border border-orange-100 hover:shadow-2xl transition-all">
