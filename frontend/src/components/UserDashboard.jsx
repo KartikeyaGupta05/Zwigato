@@ -11,9 +11,48 @@ import axios from "axios";
 import { serverUrl } from "../App";
 import Footer from "./Footer";
 
+const NoRestaurantUI = ({ currentCity }) => {
+  return (
+    <div className="w-full flex flex-col items-center justify-center py-10">
+      <div className="flex flex-wrap justify-center gap-5">
+        {categories.slice(0, 8).map((item, i) => (
+          <div
+            key={i}
+            className="w-[120px] h-[120px] md:w-[180px] md:h-[180px] rounded-2xl border-2 border-[#ff4d2d] shrink-0 overflow-hidden bg-white shadow-xl shadow-gray-200 relative"
+          >
+            <img
+              src={item.image}
+              className="w-full h-full object-cover blur-[2px] brightness-75"
+            />
+
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="bg-black/60 text-white px-3 py-1 rounded-full text-xs">
+                🔒 Locked
+              </div>
+            </div>
+
+            <div className="absolute bottom-0 w-full left-0 bg-[#ffffff96] px-3 py-1 rounded-t-xl text-center shadow text-sm font-medium text-gray-800 backdrop-blur">
+              {item.category}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-10 text-center max-w-md">
+        <h2 className="text-lg md:text-2xl font-semibold text-[#ff4d2d]">
+          No restaurants registered near {currentCity}
+        </h2>
+
+        <p className="text-gray-600 mt-2 text-sm">
+          We're expanding quickly. Restaurants will appear here soon 🍔
+        </p>
+      </div>
+    </div>
+  );
+};
+
 function UserDashboard() {
   const { currentCity, shopInMyCity, itemsInMyCity, searchItems } = useSelector(
-    (state) => state.user
+    (state) => state.user,
   );
   const cateScrollRef = useRef();
   const shopScrollRef = useRef();
@@ -29,7 +68,7 @@ function UserDashboard() {
       setUpdatedItemsList(itemsInMyCity);
     } else {
       const filteredList = itemsInMyCity?.filter(
-        (i) => i.category === category
+        (i) => i.category === category,
       );
       setUpdatedItemsList(filteredList);
     }
@@ -44,7 +83,7 @@ function UserDashboard() {
     if (element) {
       setLeftButton(element.scrollLeft > 0);
       setRightButton(
-        element.scrollLeft + element.clientWidth < element.scrollWidth
+        element.scrollLeft + element.clientWidth < element.scrollWidth,
       );
     }
   };
@@ -62,25 +101,25 @@ function UserDashboard() {
       updateButton(
         cateScrollRef,
         setShowLeftCateButton,
-        setShowRightCateButton
+        setShowRightCateButton,
       );
       updateButton(
         shopScrollRef,
         setShowLeftShopButton,
-        setShowRightShopButton
+        setShowRightShopButton,
       );
       cateScrollRef.current.addEventListener("scroll", () => {
         updateButton(
           cateScrollRef,
           setShowLeftCateButton,
-          setShowRightCateButton
+          setShowRightCateButton,
         );
       });
       shopScrollRef.current.addEventListener("scroll", () => {
         updateButton(
           shopScrollRef,
           setShowLeftShopButton,
-          setShowRightShopButton
+          setShowRightShopButton,
         );
       });
     }
@@ -90,14 +129,14 @@ function UserDashboard() {
         updateButton(
           cateScrollRef,
           setShowLeftCateButton,
-          setShowRightCateButton
+          setShowRightCateButton,
         );
       });
       shopScrollRef?.current?.removeEventListener("scroll", () => {
         updateButton(
           shopScrollRef,
           setShowLeftShopButton,
-          setShowRightShopButton
+          setShowRightShopButton,
         );
       });
     };
@@ -176,15 +215,20 @@ function UserDashboard() {
             className="w-full flex overflow-x-auto gap-4 pb-2 "
             ref={shopScrollRef}
           >
-            {shopInMyCity?.map((shop, index) => (
-              <CategoryCard
-                name={shop.name}
-                image={shop.image}
-                key={index}
-                onClick={() => navigate(`/shop/${shop._id}`)}
-              />
-            ))}
+            {shopInMyCity && shopInMyCity.length > 0 ? (
+              shopInMyCity.map((shop, index) => (
+                <CategoryCard
+                  name={shop.name}
+                  image={shop.image}
+                  key={index}
+                  onClick={() => navigate(`/shop/${shop._id}`)}
+                />
+              ))
+            ) : (
+              <NoRestaurantUI currentCity={currentCity} />
+            )}
           </div>
+
           {showRightShopButton && (
             <button
               className="absolute cursor-pointer right-0 top-1/2 -translate-y-1/2 bg-[#ff4d2d] text-white p-2 rounded-full shadow-lg hover:bg-[#e64528] z-10"
@@ -202,9 +246,13 @@ function UserDashboard() {
         </h1>
 
         <div className="w-full h-auto flex flex-wrap gap-[20px] justify-center">
-          {updatedItemsList?.map((item, index) => (
-            <FoodCard key={index} data={item} />
-          ))}
+          {updatedItemsList && updatedItemsList.length > 0 ? (
+            updatedItemsList.map((item, index) => (
+              <FoodCard key={index} data={item} />
+            ))
+          ) : (
+            <NoRestaurantUI currentCity={currentCity} />
+          )}
         </div>
       </div>
       <Footer />
