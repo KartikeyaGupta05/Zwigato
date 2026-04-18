@@ -5,6 +5,7 @@ import {
   FaTwitter,
   FaYoutube,
   FaPhoneAlt,
+  FaGithub,
 } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { FaLocationDot } from "react-icons/fa6";
@@ -25,11 +26,46 @@ function Footer() {
           </p>
 
           <div className="flex items-center gap-3 mt-4">
-            <FaFacebook className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
-            <FaInstagram className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
-            <FaTwitter className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
-            <FaYoutube className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
-          </div>
+            <a
+    href="https://github.com/KartikeyaGupta05/Zwigato"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaFacebook className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
+  </a>
+
+  <a
+    href="https://github.com/KartikeyaGupta05/Zwigato"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaInstagram className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
+  </a>
+
+  <a
+    href="https://github.com/KartikeyaGupta05/Zwigato"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaTwitter className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
+  </a>
+
+  <a
+    href="https://github.com/KartikeyaGupta05/Zwigato"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaYoutube className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
+  </a>
+
+  <a
+    href="https://github.com/KartikeyaGupta05/Zwigato"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaGithub className="text-[#ff4d2d] text-xl cursor-pointer hover:scale-110 transition" />
+  </a>
+  </div>
         </div>
 
         <div>
@@ -47,10 +83,37 @@ function Footer() {
         <div>
           <h2 className="text-lg font-semibold text-gray-800 mb-3">Services</h2>
           <ul className="text-gray-600 text-sm space-y-2">
-            <li>Food Delivery</li>
-            <li>Restaurant Partnering</li>
-            <li>Delivery Partner Jobs</li>
-            <li>Customer Support</li>
+  <a 
+    href="https://github.com/KartikeyaGupta05/Zwigato" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    <li>Food Delivery</li>
+  </a>
+
+  <a 
+    href="https://github.com/KartikeyaGupta05/Zwigato" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    <li>Restaurant Partnering</li>
+  </a>
+
+  <a 
+    href="https://github.com/KartikeyaGupta05/Zwigato" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    <li>Delivery Partner Jobs</li>
+  </a>
+
+  <a 
+    href="https://github.com/KartikeyaGupta05/Zwigato" 
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+    <li>Customer Support</li>
+  </a>
           </ul>
         </div>
 
